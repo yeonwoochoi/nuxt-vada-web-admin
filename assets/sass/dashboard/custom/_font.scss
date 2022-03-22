@@ -1,0 +1,17 @@
+.content-grey-font {
+  font-family: "Roboto", sans-serif;
+  font-weight: normal;
+  color: rgba(1, 1, 1, 0.55);
+  white-space: pre-wrap;
+}
+
+.no-decoration-black-text {
+  text-decoration: none;
+  color: black !important;
+}
+
+.ellipsis {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

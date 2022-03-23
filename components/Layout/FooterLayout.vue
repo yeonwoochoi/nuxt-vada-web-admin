@@ -3,7 +3,6 @@
     class="footer-absolute"
     app
     inset
-    padless
     absolute
     width="auto"
     color="transparent"

@@ -32,45 +32,35 @@ let bigChartDatasetOptions = {
 export default {
   name: 'LineChart',
   components: {LineChartContent},
-  props: {
-    lineChartData: {
-      type: Array,
-      default: () => [100, 70, 90, 70, 85, 60, 75, 60, 90, 80, 110, 100]
-    }
-  },
   data: () => ({
     title: '총 매출액 추이',
+    bigLineChart: {
+      activeIndex: 0,
+      chartData: {
+        datasets: [{
+          ...bigChartDatasetOptions,
+          data: []
+        }],
+        labels: bigChartLabels
+      },
+      extraOptions: chartConfigs.purpleChartOptions,
+      gradientColors: config.colors.primaryGradient,
+      gradientStops: [1, 0.4, 0],
+      categories: []
+    }
   }),
-  computed: {
-    bigLineChart() {
-      return  {
-        activeIndex: 0,
-        chartData: {
-          datasets: [{
-            ...bigChartDatasetOptions,
-            data: this.lineChartData
-          }],
-          labels: bigChartLabels
-        },
-        extraOptions: chartConfigs.purpleChartOptions,
-        gradientColors: config.colors.primaryGradient,
-        gradientStops: [1, 0.4, 0],
-        categories: []
-      }
-    },
-  },
   methods: {
-    initBigChart (index) {
+    initBigChart (arrayData) {
       let chartData = {
         datasets: [{
           ...bigChartDatasetOptions,
-          data: this.lineChartData
+          data: arrayData
         }],
         labels: bigChartLabels
       };
       this.$refs.bigChart.updateGradients(chartData);
       this.bigLineChart.chartData = chartData;
-      this.bigLineChart.activeIndex = index;
+      this.bigLineChart.activeIndex = 0;
     }
   },
 }

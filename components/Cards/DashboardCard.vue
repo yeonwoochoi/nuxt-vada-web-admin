@@ -1,9 +1,9 @@
 <template>
-  <v-card width="100%" class="py-2 px-3">
+  <v-card width="100%" class="px-3" :loading="isLoading">
     <v-card-title>
       <p class="mb-0">{{ title }}</p>
       <v-spacer/>
-      <v-btn icon :to="link">
+      <v-btn v-if="!!link" icon :to="link">
         <v-icon>mdi-arrow-right</v-icon>
       </v-btn>
     </v-card-title>
@@ -24,8 +24,12 @@ export default {
     },
     link: {
       type: String,
-      default: () => '/'
+      default: () => ''
     },
+    isLoading: {
+      type: Boolean,
+      default: () => false
+    }
   }
 }
 </script>

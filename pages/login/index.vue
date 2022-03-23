@@ -1,13 +1,13 @@
 <template>
   <div class="full-size flex-center">
-    <div v-if="!isMobile" class="half-width full-height flex-start">
+    <div v-if="$vuetify.breakpoint.mdAndUp" class="half-width full-height flex-start">
       <v-img
         :src="sideImg"
         class="full-height"
         contain
       />
     </div>
-    <div class="full-height auth-content-card-color" :class="`${isMobile ? 'full-width' : 'half-width'}`">
+    <div class="full-height auth-content-card-color" :class="`${$vuetify.breakpoint.smAndDown ? 'full-width' : 'half-width'}`">
       <v-alert
         :value="showAlert"
         type="error"
@@ -89,13 +89,6 @@ export default {
     },
     sideImg() {
       return require('../../assets/login_side_img.jpg')
-    },
-    isMobile() {
-      switch (this.$vuetify.breakpoint.name) {
-        case "sm": return true;
-        case "xs": return true;
-        default: return false;
-      }
     },
   },
   methods: {

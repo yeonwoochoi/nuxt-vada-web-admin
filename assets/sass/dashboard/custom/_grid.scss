@@ -16,6 +16,12 @@
   justify-content: space-around;
 }
 
+.flex-end {
+  display: flex;
+  align-items: center;
+  justify-content: right;
+}
+
 .flex-start {
   display: flex;
   align-items: center;

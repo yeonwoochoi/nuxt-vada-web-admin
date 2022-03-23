@@ -1,6 +1,6 @@
 <template>
   <div class="full-size flex-center">
-    <div class="full-height auth-content-card-color" :class="`${isMobile ? 'full-width' : 'half-width'}`">
+    <div class="full-height auth-content-card-color" :class="`${$vuetify.breakpoint.smAndDown ? 'full-width' : 'half-width'}`">
       <v-alert
         :value="showAlert"
         type="error"
@@ -44,7 +44,7 @@
         <v-col cols="12" v-if="showAlert"/>
       </v-row>
     </div>
-    <div v-if="!isMobile" class="half-width full-height flex-start px-6">
+    <div v-if="$vuetify.breakpoint.mdAndUp" class="half-width full-height flex-start px-6">
       <v-img
         :src="sideImg"
         class="full-height"
@@ -69,13 +69,6 @@ export default {
   computed: {
     sideImg() {
       return require('../../assets/forget_pwd_side_img.png')
-    },
-    isMobile() {
-      switch (this.$vuetify.breakpoint.name) {
-        case "sm": return true;
-        case "xs": return true;
-        default: return false;
-      }
     },
     valid () {
       const replaceV = this.email.replace(/(\s*)/g, '')

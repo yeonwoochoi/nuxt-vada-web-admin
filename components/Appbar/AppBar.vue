@@ -5,12 +5,13 @@
     flat
     fixed
     class="appbar px-md-8"
+    color="white"
   >
     <div class="flex-space-between" style="width: 100%;">
       <div class="flex-center">
         <v-app-bar-nav-icon
           class="pt-1 mr-4"
-          v-if="isMobile"
+          v-if="$vuetify.breakpoint.smAndDown"
           @click="drawer = !drawer"
         />
         <p class="mb-0 pt-2 font-weight-regular title">{{currentPath}}</p>
@@ -33,13 +34,6 @@ export default {
       let arr = path.split('/')
       let result = arr[arr.length-1].toUpperCase();
       return !result ? 'MAIN' : result;
-    },
-    isMobile() {
-      switch (this.$vuetify.breakpoint.name) {
-        case "sm": return true;
-        case "xs": return true;
-        default: return false;
-      }
     },
     drawer: {
       get () {

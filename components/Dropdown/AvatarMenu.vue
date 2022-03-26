@@ -26,7 +26,7 @@
             color="#9a9a9a"
             :ripple="false"
             class="no-background-hover font-weight-regular mb-4"
-            to="/profile"
+            :to="profileLink"
           >
             Profile
           </v-btn>
@@ -36,7 +36,7 @@
             color="#9a9a9a"
             :ripple="false"
             class="no-background-hover font-weight-regular"
-            to="/profile/edit"
+            :to="editAccountLink"
           >
             Edit Account
           </v-btn>
@@ -60,6 +60,10 @@
 <script>
 export default {
   name: "AvatarMenu",
+  data: () => ({
+    profileLink: '/profile',
+    editAccountLink: '/profile/edit'
+  }),
   methods: {
     logout() {
       this.$emit('logout')

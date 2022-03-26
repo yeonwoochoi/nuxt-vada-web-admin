@@ -33,10 +33,9 @@
                   text
                   class="font-weight-bold elevation-0 pa-0 no-background-hover"
                   :ripple="false"
-                  :disabled="item.isAnswered"
                   @click="showDetail(item)"
                 >
-                  답변하기 >
+                  상세보기 >
                 </v-btn>
               </template>
             </v-data-table>
@@ -83,12 +82,19 @@
                 <p class="user-detail-content-font">{{ activeItem.content }}</p>
               </v-col>
 
+              <v-col cols="12" sm="2" class="text-sm-center pb-0" v-if="activeItem.isAnswered">
+                <p class="user-detail-header-font">답변 날짜</p>
+              </v-col>
+              <v-col cols="12" sm="9" v-if="activeItem.isAnswered">
+                <p class="user-detail-content-font">{{ activeItem.answer.created_at }}</p>
+              </v-col>
+
               <v-col cols="12" sm="2" class="text-sm-center pb-0">
                 <p class="user-detail-header-font">답변</p>
               </v-col>
               <v-col cols="12" sm="9">
                 <v-textarea
-                  v-model="activeItem.answer"
+                  v-model="activeItem.answer.data"
                   ref="answer"
                   label="답변"
                   rows="8"
@@ -97,10 +103,8 @@
                   auto-grow
                   counter
                   clearable
-                  :disabled="activeItem.isAnswered"
                 />
               </v-col>
-
               <v-col cols="12">
                 <div class="full-width flex-end">
                   <v-btn
@@ -179,7 +183,6 @@ export default {
     ],
     initLoading: true,
     submitLoading: false,
-
     activeItem: null,
     scrollOptions: {
       duration: 800,
@@ -195,10 +198,16 @@ export default {
       let result = [];
       for (let i = 0; i < this.inquiryItems.length; i++){
         let temp = this.inquiryItems[i];
+        if (!temp.answer) {
+          temp.answer = {
+            data: '',
+            created_at: ''
+          }
+        }
         result.push({
           ...temp,
           index: i+1,
-          isAnswered: !!temp.answer
+          isAnswered: !!temp.answer.data
         })
       }
       return result;
@@ -302,8 +311,14 @@ export default {
     submit() {
       // TODO: 답변 제출
       this.submitLoading = true;
+      if (!this.activeItem.answer.data) {
+        alert("값을 입력해주세요")
+        this.submitLoading = false;
+        return;
+      }
       setTimeout(() => {
-        alert(`답변 완료 To: ${this.activeItem.author}`)
+        this.activeItem.answer.created_at = new Date().toISOString().replace('T', ' ').substring(0, 19);
+        alert(`답변 완료 To: ${this.activeItem.author} + ${this.activeItem.answer.created_at}`)
         this.activeItem = null
         this.submitLoading = false;
         this.$router.go(0)

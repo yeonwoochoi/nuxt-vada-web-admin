@@ -272,7 +272,7 @@ export default {
       this.$router.push(this.inquiryLink)
     },
     moveNewsDetail({idx}) {
-      this.$router.push(this.newsLink + `/${idx}`)
+      this.$router.push(this.newsLink)
     },
     async fetchData() {
       setTimeout(() => {

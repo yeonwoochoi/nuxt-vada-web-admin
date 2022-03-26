@@ -41,10 +41,16 @@ export default {
       default: () => ''
     },
   },
+  data: () => ({
+    isClicked: false
+  }),
   methods: {
     onClickOkBtn() {
+      if (this.isClicked) return;
+      this.isClicked = true;
       this.$emit("ok")
       this.closeDialog()
+      this.isClicked = false;
     },
     closeDialog() {
       this.$emit("cancel")

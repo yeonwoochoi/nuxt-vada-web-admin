@@ -1,7 +1,7 @@
 <template>
   <v-app>
     <side-bar/>
-    <app-bar/>
+    <app-bar @logout="logout"/>
     <v-main :style="`background-color: ${bgColor}`">
       <notification/>
       <content-layout/>
@@ -24,6 +24,12 @@ export default {
     ...mapState({
       bgColor: "backgroundColor",
     })
+  },
+  methods: {
+    logout () {
+      //TODO: Logout 구현
+      this.$router.push('/login')
+    }
   }
 }
 </script>

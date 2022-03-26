@@ -13,6 +13,20 @@
               :items-per-page="itemsPerPage"
               :loading="initLoading"
             >
+              <template v-slot:top>
+                <v-row align="center" justify="space-between" class="px-4 my-1">
+                  <v-col cols="12" sm="3">
+                    <v-btn
+                      dark
+                      class="elevation-0 mt-md-2 mb-0"
+                      :color="baseColor"
+                      @click="createNews"
+                    >
+                      추가
+                    </v-btn>
+                  </v-col>
+                </v-row>
+              </template>
               <template v-slot:item.title="{item}">
                 <td class="text-start ellipsis" style="max-width: 280px; font-size: 13px;">
                   <div class="ellipsis font-weight-medium">
@@ -199,7 +213,7 @@ export default {
         width: '12%'
       },
       {
-        text: '수정하기',
+        text: '삭제하기',
         align: 'center',
         sortable: false,
         filterable: false,
@@ -746,13 +760,18 @@ export default {
       }, 1000)
     },
 
+    createNews() {
+      // TODO: News create
+      alert("Create News!")
+    },
+
     showDetail(item) {
       this.activeItem = item;
       this.$vuetify.goTo("#scrollNewsTarget", this.scrollOptions)
     },
 
     updateNews() {
-      // TODO: 답변 제출
+      // TODO: News update
       this.updateLoading = true;
       setTimeout(() => {
         alert(`업데이트 완료`)

@@ -2,13 +2,14 @@
   <v-container fluid>
     <v-row align="start" justify="start">
       <v-col cols="12" class="my-2">
-        <dashboard-card :title="privateUserInfoCardTitle" :is-loading="initLoading">
+        <dashboard-card :title="privateUserInfoCardTitle">
           <template v-slot:default>
             <v-data-table
               class="full-width"
               :headers="privateUserInfoTableHeader"
               :items="privateUserInfoTableItems"
               :items-per-page="itemsPerPage"
+              :loading="initLoading"
               hide-default-footer
               :mobile-breakpoint="600"
             >
@@ -362,8 +363,8 @@ export default {
     itemsPerPage: 10,
 
     activeUser: null,
-    initLoading: true,
 
+    initLoading: true,
     updatePointLoading: false,
 
     deleteDialogTitle: '회원 삭제',

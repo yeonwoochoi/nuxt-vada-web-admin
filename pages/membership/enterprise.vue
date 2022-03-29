@@ -211,7 +211,7 @@
 
               <v-col cols="12" class="py-2"><v-divider/></v-col>
 
-              <v-col cols="12" class="mt-10 flex-end">
+              <v-col cols="12" class="mt-10 flex-end" v-if="activeUser.isApproved">
                 <v-dialog
                   v-model="updatePointDialogOpen"
                   max-width="400"
@@ -292,6 +292,34 @@
                     :comment="confirmYearPassContent"
                     @cancel="updateYearPassDialogOpen = false"
                     @ok="giveYearPass"
+                  />
+                </v-dialog>
+              </v-col>
+              <v-col cols="12" class="mt-10 flex-end" v-else>
+                <v-dialog
+                  v-model="confirmSignUpDialogOpen"
+                  max-width="400"
+                >
+                  <template v-slot:activator="{on, attrs}">
+                    <v-btn
+                      x-large
+                      dark
+                      class="font-weight-bold ma-1"
+                      :color="baseColor"
+                      width="200px"
+                      height="52px"
+                      v-bind="attrs"
+                      v-on="on"
+                      style="letter-spacing: 1px; text-transform: none;"
+                    >
+                      가입 승인
+                    </v-btn>
+                  </template>
+                  <confirmation-dialog
+                    :title="confirmSignUpDialogTitle"
+                    :comment="confirmSignUpDialogContent"
+                    @cancel="confirmSignUpDialogOpen = false"
+                    @ok="approveSignup"
                   />
                 </v-dialog>
               </v-col>
@@ -376,13 +404,24 @@
                   </template>
                   <template v-slot:item.update="{item}">
                     <v-btn
+                      v-if="!item.isApproved"
+                      small
+                      dark
+                      class="elevation-0"
+                      :color="baseColor"
+                      @click="approveIpRegister(item)"
+                      :loading="item.isLoading"
+                    >
+                      승인
+                    </v-btn>
+                    <v-btn
+                      v-else
                       small
                       dark
                       class="elevation-0"
                       :color="baseColor"
                       @click="reissuedPassword(item)"
                       :loading="item.isLoading"
-                      :disabled="!item.isApproved"
                     >
                       비밀번호 재발급 >
                     </v-btn>
@@ -418,10 +457,10 @@
 
               <v-col cols="12" class="flex-space-between mt-12">
                 <p class="title">사업자 등록증 이미지</p>
-                <div>
+                <div class="flex-center">
                   <div class="filebox mr-2">
                     <label for="searchFile">
-                      <v-icon color="green" size="25" style="padding-top: 0.1em">mdi-file-upload</v-icon>
+                      <v-icon color="green" size="25">mdi-file-upload</v-icon>
                       수정
                     </label>
                     <input
@@ -544,7 +583,7 @@ export default {
         value: 'isApproved',
       },
       {
-        text: '재발급',
+        text: '승인/재발급',
         align: 'start',
         sortable: false,
         filterable: false,
@@ -562,6 +601,7 @@ export default {
     initLoading: true,
     updatePointLoading: false,
     addIpAddressLoading: false,
+    approveSignUpLoading: false,
 
     activeUser: null,
 
@@ -580,6 +620,9 @@ export default {
 
     confirmYearPassTitle: '1년 이용권 부여',
 
+    confirmSignUpDialogTitle: '가입 승인',
+    confirmSignUpDialogContent: '기업 회원 가입을 승인하시겠습니까?',
+
     scrollOptions: {
       duration: 800,
       offset: -80,
@@ -589,6 +632,7 @@ export default {
     updatePointDialogOpen: false,
     updateYearPassDialogOpen: false,
     addIpAddressDialogOpen: false,
+    confirmSignUpDialogOpen: false,
 
     newIpAddress: '',
     newBusinessRegistrationFile: null,
@@ -636,7 +680,7 @@ export default {
             businessNumber: '1231231231',
             managerEmail: 'rud527@naver.com',
             managerName: 'choi yeon woo',
-            businessRegistrationFile: 'https://cdn.vuetifyjs.com/images/parallax/material.jpg',
+            businessRegistrationFile: 'ai.kunsan.ac.kr:3000/uploads/files-1637042697203.pdf',
             point: 14,
             pass_expiration_at: '2023-03-23',
             registeredIP: [
@@ -681,7 +725,7 @@ export default {
             businessNumber: '1231231231',
             managerEmail: 'rud527@naver.com',
             managerName: 'choi yeon woo',
-            businessRegistrationFile: 'https://cdn.vuetifyjs.com/images/parallax/material.jpg',
+            businessRegistrationFile: 'http://ai.kunsan.ac.kr:3000/uploads/files-1637042697203.pdf',
             point: 14,
             pass_expiration_at: '2023-03-23',
             registeredIP: [
@@ -846,9 +890,25 @@ export default {
 
     searchByFile(event) {
       this.newBusinessRegistrationFile = event.target.files[0]
-      console.dir(event.target.files[0])
-      console.log(typeof event.target.files[0])
     },
+
+    approveSignup() {
+      this.approveSignUpLoading = true;
+      setTimeout(() => {
+        this.approveSignUpLoading = false;
+        alert("approve sign up!")
+        this.$router.go(0);
+      }, 1000)
+    },
+
+    approveIpRegister(item) {
+      item.isLoading = true;
+      setTimeout(() => {
+        item.isLoading = false;
+        alert("approve ip success")
+        this.$router.go(0);
+      }, 1000)
+    }
   },
   mounted() {
     this.fetchData();

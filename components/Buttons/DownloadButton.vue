@@ -1,13 +1,12 @@
 <template>
-  <button
-    type="button"
-    class="no-background-hover elevation-0 mx-2 pb-2 subtitle-2 font-weight-bold"
-    :onclick="`window.open('http://${link}', '_blank')`"
-    formtarget="_blank"
-    style="background-color: transparent; color: #666666; height: fit-content"
+  <a
+    :href="link"
+    download
+    class="no-decoration-black-text font-weight-bold text--darken-1 grey--text"
+    target="_blank"
   >
     <slot/>
-  </button>
+  </a>
 </template>
 
 <script>

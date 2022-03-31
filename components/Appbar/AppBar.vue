@@ -10,11 +10,11 @@
     <div class="flex-space-between" style="width: 100%;">
       <div class="flex-center">
         <v-app-bar-nav-icon
-          class="pt-1 mr-4"
-          v-if="$vuetify.breakpoint.smAndDown"
+          class="mr-4"
+          v-if="$vuetify.breakpoint.mdAndDown"
           @click="drawer = !drawer"
         />
-        <p class="mb-0 pt-2 font-weight-regular title">{{currentPath}}</p>
+        <p class="mb-0 font-weight-regular title">{{currentPath}}</p>
       </div>
       <div>
         <avatar-menu @logout="logout"/>
@@ -28,13 +28,20 @@ import AvatarMenu from "../Dropdown/AvatarMenu";
 export default {
   name: "AppBar",
   components: {AvatarMenu},
+  created() {
+    this.setCurrentPath()
+  },
+  data: () => ({
+    currentPath: 'MAIN'
+  }),
+  watch: {
+    $route(to, from) {
+      if (to.path !== from.path) {
+        this.setCurrentPath()
+      }
+    }
+  },
   computed: {
-    currentPath() {
-      let path = this.$router.currentRoute.path;
-      let arr = path.split('/')
-      let result = arr[arr.length-1].toUpperCase();
-      return !result ? 'MAIN' : result;
-    },
     drawer: {
       get () {
         return this.$store.getters['getDrawer']
@@ -47,6 +54,12 @@ export default {
   methods: {
     logout() {
       this.$emit('logout')
+    },
+    setCurrentPath() {
+      let path = this.$router.currentRoute.path;
+      let arr = path.split('/')
+      let result = arr[arr.length-1].toUpperCase();
+      this.currentPath = !result ? 'MAIN' : result;
     }
   }
 }

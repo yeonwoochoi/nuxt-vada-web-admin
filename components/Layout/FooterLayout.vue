@@ -7,7 +7,7 @@
     width="auto"
     color="transparent"
   >
-    <div class="footer-content">
+    <div class="footer-content px-4 py-1">
       <div>
         <a
           class="no-decoration-black-text text--black"

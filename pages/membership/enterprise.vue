@@ -238,7 +238,7 @@
                     </v-card-title>
                     <v-card-text>
                       <v-text-field
-                        v-model="activeUser.point"
+                        v-model="activeUserPoint"
                         flat
                         filled
                         hide-details
@@ -604,6 +604,7 @@ export default {
     approveSignUpLoading: false,
 
     activeUser: null,
+    activeUserPoint: 0,
 
     page: 1,
     totalPage: 1,
@@ -836,6 +837,7 @@ export default {
 
     showEnterpriseUserDetail(item) {
       this.activeUser = item
+      this.activeUserPoint = this.activeUser.point
       this.$vuetify.goTo("#scrollTarget", this.scrollOptions)
     },
 
@@ -849,8 +851,11 @@ export default {
 
     updatePoint() {
       this.updatePointLoading = true;
+      this.activeUser.point = this.activeUserPoint;
+
       setTimeout(() => {
         this.activeUser = null
+        this.activeUserPoint = 0
         this.updatePointLoading = false;
         this.updatePointDialogOpen = false;
         this.$router.go(0);

@@ -392,30 +392,8 @@
                   hide-default-footer
                   :mobile-breakpoint="600"
                 >
-                  <template v-slot:item.isApproved="{item}">
-                    <v-chip
-                      :color="getColor(item.isApproved)"
-                      dark
-                      :ripple="false"
-                      class="no-background-hover"
-                    >
-                      {{!item.isApproved ? '승인대기' : '승인완료'}}
-                    </v-chip>
-                  </template>
                   <template v-slot:item.update="{item}">
                     <v-btn
-                      v-if="!item.isApproved"
-                      small
-                      dark
-                      class="elevation-0"
-                      :color="baseColor"
-                      @click="approveIpRegister(item)"
-                      :loading="item.isLoading"
-                    >
-                      승인
-                    </v-btn>
-                    <v-btn
-                      v-else
                       small
                       dark
                       class="elevation-0"
@@ -439,7 +417,6 @@
                           :color="baseColor"
                           v-bind="attrs"
                           v-on="on"
-                          :disabled="!item.isApproved"
                         >
                           삭제 >
                         </v-btn>
@@ -576,14 +553,7 @@ export default {
         value: 'password',
       },
       {
-        text: '승인여부',
-        align: 'start',
-        sortable: false,
-        filterable: false,
-        value: 'isApproved',
-      },
-      {
-        text: '승인/재발급',
+        text: '재발급',
         align: 'start',
         sortable: false,
         filterable: false,
@@ -690,7 +660,7 @@ export default {
                 ip: '172.003.214.01',
                 id: 'rud532@naver.com',
                 password: '123123123a',
-                isApproved: true,
+
               },
             ],
             isApproved: true
@@ -710,12 +680,12 @@ export default {
                 ip: '172.003.214.01',
                 id: 'rud532@naver.com',
                 password: '123123123a',
-                isApproved: true,
+
               },
               {
                 index: 2,
                 ip: '172.003.214.01',
-                isApproved: false,
+
               },
             ],
             isApproved: true
@@ -735,12 +705,10 @@ export default {
                 ip: '172.003.214.01',
                 id: 'rud532@naver.com',
                 password: '123123123a',
-                isApproved: true,
               },
               {
                 index: 2,
                 ip: '172.003.214.01',
-                isApproved: false,
               },
             ],
             isApproved: false
@@ -760,31 +728,26 @@ export default {
                 ip: '172.193.214.01',
                 id: 'rud532@naver.com',
                 password: '123123123a',
-                isApproved: true,
               },
               {
                 index: 2,
                 ip: '172.003.214.01',
                 id: 'basjfewi123@naver.com',
                 password: '123123123a',
-                isApproved: true,
               },
               {
                 index: 3,
                 ip: '172.023.214.03',
-                isApproved: false,
               },
               {
                 index: 4,
                 ip: '172.003.132.01',
                 id: 'chlxodyd33@gmail.com',
                 password: '123123123a',
-                isApproved: true,
               },
               {
                 index: 5,
                 ip: '174.003.214.01',
-                isApproved: false,
               },
             ],
             isApproved: true

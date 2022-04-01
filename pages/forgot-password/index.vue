@@ -17,7 +17,7 @@
             인증코드는 등록된 휴대전화 번호로 전달됩니다.
           </p>
         </v-col>
-        <v-col cols="10">
+        <v-col cols="10" class="mt-4">
           <v-text-field
             v-model="email"
             dense
@@ -39,6 +39,18 @@
             :loading="isLoading"
           >
             인증번호 전송
+          </v-btn>
+          <v-btn
+            to="/login"
+            large
+            rounded
+            color="transparent"
+            :width="`100%`"
+            height="50"
+            :ripple="false"
+            class="no-background-hover text-center white--text font-weight-bold subtitle-1 full-width elevation-0 mt-2"
+          >
+            취소
           </v-btn>
         </v-col>
         <v-col cols="12" v-if="showAlert"/>

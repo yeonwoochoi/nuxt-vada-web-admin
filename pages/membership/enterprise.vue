@@ -337,6 +337,7 @@
                       :color="baseColor"
                       v-bind="attrs"
                       v-on="on"
+                      :disabled="!activeUser.isApproved"
                     >
                       IP 추가
                     </v-btn>
@@ -400,6 +401,7 @@
                       :color="baseColor"
                       @click="reissuedPassword(item)"
                       :loading="item.isLoading"
+                      :disabled="!activeUser.isApproved"
                     >
                       비밀번호 재발급 >
                     </v-btn>
@@ -417,6 +419,7 @@
                           :color="baseColor"
                           v-bind="attrs"
                           v-on="on"
+                          :disabled="!activeUser.isApproved"
                         >
                           삭제 >
                         </v-btn>
@@ -539,11 +542,11 @@ export default {
         value: 'ip',
       },
       {
-        text: '아이디',
+        text: '이메일',
         align: 'start',
         sortable: false,
         filterable: false,
-        value: 'id',
+        value: 'email',
       },
       {
         text: '비밀번호',
@@ -658,7 +661,7 @@ export default {
               {
                 index: 1,
                 ip: '172.003.214.01',
-                id: 'rud532@naver.com',
+                email: 'rud532@naver.com',
                 password: '123123123a',
 
               },
@@ -678,14 +681,14 @@ export default {
               {
                 index: 1,
                 ip: '172.003.214.01',
-                id: 'rud532@naver.com',
+                email: 'rud532@naver.com',
                 password: '123123123a',
 
               },
               {
                 index: 2,
                 ip: '172.003.214.01',
-
+                email: 'rud532@naver.com',
               },
             ],
             isApproved: true
@@ -703,12 +706,12 @@ export default {
               {
                 index: 1,
                 ip: '172.003.214.01',
-                id: 'rud532@naver.com',
-                password: '123123123a',
+                email: 'rud532@naver.com',
               },
               {
                 index: 2,
                 ip: '172.003.214.01',
+                email: 'rud532@naver.com',
               },
             ],
             isApproved: false
@@ -725,29 +728,31 @@ export default {
             registeredIP: [
               {
                 index: 1,
-                ip: '172.193.214.01',
-                id: 'rud532@naver.com',
+                ip: '172.003.214.01',
+                email: 'rud532@naver.com',
                 password: '123123123a',
               },
               {
                 index: 2,
                 ip: '172.003.214.01',
-                id: 'basjfewi123@naver.com',
+                email: 'rud532@naver.com',
                 password: '123123123a',
               },
               {
                 index: 3,
-                ip: '172.023.214.03',
+                ip: '172.003.214.01',
+                email: 'rud532@naver.com',
               },
               {
                 index: 4,
-                ip: '172.003.132.01',
-                id: 'chlxodyd33@gmail.com',
+                ip: '172.003.214.01',
+                email: 'rud532@naver.com',
                 password: '123123123a',
               },
               {
                 index: 5,
-                ip: '174.003.214.01',
+                ip: '172.003.214.01',
+                email: 'rud532@naver.com',
               },
             ],
             isApproved: true
@@ -844,6 +849,7 @@ export default {
     },
 
     reissuedPassword(item) {
+      console.log(item.isApproved)
       item.isLoading = true;
       setTimeout(() => {
         item.isLoading = false;

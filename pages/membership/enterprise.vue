@@ -185,6 +185,15 @@
               <v-col cols="12" class="py-2"><v-divider/></v-col>
 
               <v-col cols="12" sm="2" class="text-sm-center pb-0">
+                <p class="user-detail-header-font">매니저 계정 비밀번호</p>
+              </v-col>
+              <v-col cols="12" sm="9">
+                <p class="user-detail-content-font">{{ activeUser.managerPassword }}</p>
+              </v-col>
+
+              <v-col cols="12" class="py-2"><v-divider/></v-col>
+
+              <v-col cols="12" sm="2" class="text-sm-center pb-0">
                 <p class="user-detail-header-font">매니저명</p>
               </v-col>
               <v-col cols="12" sm="9">
@@ -653,6 +662,7 @@ export default {
             companyName: 'Samsung',
             businessNumber: '1231231231',
             managerEmail: 'rud527@naver.com',
+            managerPassword: '123123123a',
             managerName: 'choi yeon woo',
             businessRegistrationFile: 'ai.kunsan.ac.kr:3000/uploads/files-1637042697203.pdf',
             point: 14,
@@ -673,6 +683,7 @@ export default {
             companyName: 'Samsung',
             businessNumber: '1231231231',
             managerEmail: 'rud527@naver.com',
+            managerPassword: '123123123a',
             managerName: 'choi yeon woo',
             businessRegistrationFile: 'https://cdn.vuetifyjs.com/images/parallax/material.jpg',
             point: 14,
@@ -698,6 +709,7 @@ export default {
             companyName: 'Samsung',
             businessNumber: '1231231231',
             managerEmail: 'rud527@naver.com',
+            managerPassword: '123123123a',
             managerName: 'choi yeon woo',
             businessRegistrationFile: 'http://ai.kunsan.ac.kr:3000/uploads/files-1637042697203.pdf',
             point: 14,
@@ -721,6 +733,7 @@ export default {
             companyName: 'Samsung',
             businessNumber: '1231231231',
             managerEmail: 'rud527@naver.com',
+            managerPassword: '123123123a',
             managerName: 'choi yeon woo',
             businessRegistrationFile: 'https://cdn.vuetifyjs.com/images/parallax/material.jpg',
             point: 14,

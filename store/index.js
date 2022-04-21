@@ -3,7 +3,7 @@ export const state = () => ({
   baseColor: '#40A677',
   company: 'VADA PARTNERS',
   madeBy: 'Run-i Studio',
-  siteOrigin: 'http://localhost:8765',
+  siteOrigin: 'http://localhost:8765', // TODO: 나중에 url fetching 하면 바꿔야함
   companyDefaultLogo: require('assets/logo/logo_vada_black.png'),
   companyWhiteLogo: require('assets/logo/logo_vada_white.png'),
   drawer: true,
@@ -23,35 +23,24 @@ export const state = () => ({
     },
     { title: '데이터관리', icon: 'mdi-database', link: '/data', items: []},
   ],
-  alertToggle: false,
-  alertInfo: {
-    component: '',
-    message: 'Alert',
-    type: 'success'
-  }
+  sheetTitle: '',
 })
 
 export const getters = {
   getDrawer: state => state.drawer,
+  getSheetTitle: state => state.sheetTitle,
 }
 
 export const mutations = {
   setDrawer: (state, data) => {
     state.drawer = data
   },
-  openAlert: (state, payload) => {
-    state.alertInfo = payload;
-    state.alertToggle = true;
+  setSheetTitle: (state, data) => {
+    state.sheetTitle = data
   },
-  closeAlert: (state) => {
-    state.alertInfo = {
-      component: '',
-      message: '',
-      type: 'success'
-    };
-    if (state.alertToggle) {
-      state.alertToggle = false;
-    }
+  logout(state) {
+    state.auth.user = {}
+    state.auth.loggedIn = false;
   }
 }
 

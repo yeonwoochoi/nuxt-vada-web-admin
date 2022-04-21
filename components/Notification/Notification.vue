@@ -1,29 +1,43 @@
 <template>
+  <!--
   <v-alert
     prominent
     tile
-    :value="toggle"
-    :type="info.type"
+    v-model="show"
+    :type="color"
     transition="slide-y-transition"
     class="mb-0"
     dismissible
     dense
   >
-    {{ info.message }}
+    {{ message }}
   </v-alert>
+  -->
+  <v-snackbar v-model="show" :color="color" top style="padding-top: 80px;">
+    <div style="display: flex; align-items: center; justify-content: space-between">
+      <p class="white--text mb-0 pl-6" style="font-size: 1rem;">{{ message }}</p>
+      <v-btn text @click="show = false">Close</v-btn>
+    </div>
+  </v-snackbar>
 </template>
 
 <script>
-import {mapState} from "vuex";
-
 export default {
   name: "Notification",
-  computed: {
-    ...mapState({
-      toggle: 'alertToggle',
-      info: 'alertInfo'
+  data: () => ({
+    show: false,
+    message: '',
+    color: 'error'
+  }),
+  created() {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'alert/showMessage') {
+        this.message = state.alert.content
+        this.color = state.alert.color
+        this.show = true
+      }
     })
-  },
+  }
 }
 </script>
 

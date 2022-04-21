@@ -70,8 +70,14 @@
 import Card from "../../components/Cards/Card";
 export default {
   name: "ForgotPassword",
-  layout: 'auth',
   components: {Card},
+  layout: 'auth',
+  auth: false,
+  asyncData({$auth, redirect, store}) {
+    if ($auth.loggedIn) {
+      redirect('/')
+    }
+  },
   data: () => ({
     email: '',
     isLoading: false,
@@ -93,14 +99,27 @@ export default {
       if (this.isLoading) return;
       this.isLoading = true;
       if (this.valid) {
-        this.showAlert = false;
-        setTimeout(() => {
-          alert("인증코드가 전송되었습니다.")
-          this.isLoading = false;
-          this.$router.push('/forgot-password/auth')
-        }, 3000)
+        let params = {
+          type: 'Find',
+          email: this.email
+        }
+        await this.$store.dispatch('user/sendEmailAuthCode', params).then(
+          res => {
+            this.showAlert = false;
+            this.isLoading = false;
+            this.$store.commit('user/setEmailForPwdReset', this.email)
+            alert("인증코드가 전송되었습니다.")
+            this.$router.push('/forgot-password/auth')
+          },
+          err => {
+            this.alertMessage = err
+            this.showAlert = true;
+            this.isLoading = false;
+          }
+        )
       }
       else {
+        this.alertMessage = '이메일 형식으로 입력해주세요';
         this.showAlert = true;
         this.isLoading = false;
       }

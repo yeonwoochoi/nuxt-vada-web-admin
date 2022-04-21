@@ -73,6 +73,11 @@
 export default {
   name: "Login",
   layout: 'auth',
+  asyncData({$auth, redirect}) {
+    if ($auth.loggedIn) {
+      redirect('/')
+    }
+  },
   data: () => ({
     cardTitle: '로그인',
     cardSubtitle: 'VADA PARTNERS 관리자 페이지입니다.',
@@ -85,7 +90,21 @@ export default {
   }),
   computed: {
     valid() {
-      return !!this.adminId && !!this.password
+      if (!this.adminId) {
+        this.alertMessage = '이메일을 입력해주세요.';
+        return false;
+      }
+      const replaceV = this.adminId.replace(/(\s*)/g, '');
+      const pattern = /^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*.[a-zA-Z]{2,3}$/;
+      if (!pattern.test(replaceV)) {
+        this.alertMessage = '이메일 형식으로 입력해주세요';
+        return false;
+      }
+      if (!this.password) {
+        this.alertMessage = '올바른 비밀번호를 입력해 주십시오.'
+        return false;
+      }
+      return true;
     },
     sideImg() {
       return require('../../assets/login_side_img.jpg')
@@ -93,8 +112,15 @@ export default {
   },
   methods: {
     async login() {
-      // TODO (LOGIN): 로그인 기능
       if (this.valid) {
+        this.$auth.loginWith('local', {data: { email: this.adminId, password: this.password }})
+          .then(res => {
+            this.$router.push('/')
+          })
+          .catch(err => {
+            this.alertMessage = err.response.data['message']
+            this.showAlert = true;
+          })
         this.$router.push('/')
       }
       else {

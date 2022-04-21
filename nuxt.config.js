@@ -28,6 +28,8 @@ export default {
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: [
     { src: '~/plugins/vee-validate', ssr: false },
+    { src: '~/plugins/axios' },
+    { src: '~/plugins/notifier' },
   ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
@@ -41,6 +43,8 @@ export default {
 
   // Modules: https://go.nuxtjs.dev/config-modules
   modules: [
+    '@nuxtjs/axios',
+    '@nuxtjs/auth-next'
   ],
 
   // Vuetify module configuration: https://go.nuxtjs.dev/config-vuetify
@@ -52,14 +56,55 @@ export default {
     },
   },
 
+  router: {
+    middleware: 'auth'
+  },
+
+  auth: {
+    redirect: {
+      login: '/login',
+      logout: '/login',
+      callback: '/login',
+      home: '/'
+    },
+    strategies: {
+      local: {
+        scheme: 'refresh',
+        token: {
+          property: 'token.access_token',
+          type: 'Bearer',
+          name: 'Authorization',
+          global: true,   // request header 에 authentication 으로 자동 포함됨
+          maxAge: 60  // 30분
+          //maxAge: 1800  // 30분
+        },
+        refreshToken: {
+          property: 'token.refresh_token',
+          data: 'refresh_token',
+          maxAge: 60 * 60 * 24 * 30 // 30일
+        },
+        user: {
+          property: 'user',
+          data: 'user'
+        },
+        endpoints: {
+          login: { url: '/user/login-admin', method: 'post', },
+          refresh: { url: '/user/refresh-token', method: 'post' },
+          user: { url: '/user/login-email?type=admin', method: 'post' },
+        },
+      }
+    }
+  },
+
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {
     transpile: ['vee-validate/dist/rules']
   },
   server: {
-    port: 8766
+    port: 8766,
+    host: '127.0.0.1'
   },
   axios: {
-    baseURL: process.env.BASE_URL || '127.0.0.1:3000'
+    baseURL: process.env.API_URL
   }
 }

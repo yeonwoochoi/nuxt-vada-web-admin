@@ -26,8 +26,6 @@
             dark
             label="인증코드"
             prepend-inner-icon="mdi-focus-field-horizontal"
-            @keypress="isNumber($event)"
-            maxlength="6"
             hide-details
           />
         </v-col>
@@ -115,11 +113,23 @@
 export default {
   name: "ForgotPasswordAuth",
   layout: 'auth',
+  auth: false,
+  asyncData({$auth, redirect, store}) {
+    if ($auth.loggedIn) {
+      redirect('/')
+    }
+    else if (!store.getters["user/getEmailForPwdReset"]) {
+      redirect('/membership/reset-password')
+    }
+    return {
+      email: store.getters["user/getEmailForPwdReset"]
+    }
+  },
+  destroyed() {
+    this.$store.commit('user/resetEmailForPwdReset')
+  },
   data: () => ({
-    //TODO (AuthCode): 임시 번호, 임시 이메일
-    email: 'rud527@naver.com',
     emailAuth: '',
-    code: '111111',
     password: '',
     passwordConfirm: '',
     showPassword: false,
@@ -132,9 +142,6 @@ export default {
     sideImg() {
       return require('../../assets/forget_pwd_side_img.png')
     },
-    isEqualAuthCode() {
-      return `${this.emailAuth}` === `${this.code}`
-    },
     rules() {
       return {
         required: value => !!value || '값을 입력해주세요',
@@ -145,14 +152,10 @@ export default {
   },
   methods: {
     async submit() {
-      if (this.isLoading) return;
       this.isLoading = true;
 
       if (!this.emailAuth || !this.password || !this.passwordConfirm) {
         this.alertMessage = '모든 값을 입력해주세요.'
-      }
-      else if (!this.isEqualAuthCode) {
-        this.alertMessage = '잘못된 인증코드입니다.'
       }
       else if (!/^(?=.*[a-zA-Z])((?=.*\d)|(?=.*\W)).*$/.test(this.password)) {
         this.alertMessage = '영문 대소문자와 최소 1개의 숫자 혹은 특수 문자를 포함해야 합니다.'
@@ -161,43 +164,60 @@ export default {
         this.alertMessage = '비밀번호가 일치하지 않습니다.'
       }
       else {
-        this.showAlert = false;
-        //TODO (resetPwdAuth): 여기서 서버에 재설정 api 호출하고나서..
-        setTimeout(() => {
-          this.isLoading = false;
-          alert("비밀번호 변경 성공")
-          this.$router.push('/login')
-        }, 3000)
-        return;
+        let param = {
+          email: this.email,
+          code: this.emailAuth
+        }
+        // 인증코드 확인
+        let params = {
+          email: this.email,
+          code: this.emailAuth,
+          password: this.password
+        }
+        await this.$store.dispatch('user/changePassword', params).then(
+          res => {
+            this.isLoading = false;
+            this.showAlert = false;
+            this.$store.commit('user/resetEmailForPwdReset')
+            alert("비밀번호 변경 성공")
+            this.$router.push('/login')
+          },
+          err => {
+            this.alertMessage = err
+            this.showAlert = true;
+            this.isLoading = false;
+          }
+        )
+        return
       }
-
       this.showAlert = true;
       this.isLoading = false;
     },
     //TODO (Email auth): 재전송 코드 수정
     async resendAuthCode() {
-      if (this.isSendLoading) return;
       this.isSendLoading = true;
       if (!!this.email) {
-        this.showAlert = false;
-        setTimeout(() => {
-          alert("인증코드가 전송되었습니다.")
-          this.isSendLoading = false;
-        }, 3000)
+        let params = {
+          type: 'Find',
+          email: this.email
+        }
+        await this.$store.dispatch('user/sendEmailAuthCode', params).then(
+          res => {
+            this.showAlert = false;
+            alert("인증코드가 재전송되었습니다.")
+            this.isSendLoading = false;
+          },
+          err => {
+            this.alertMessage = err
+            this.showAlert = true;
+            this.isSendLoading = false;
+          }
+        )
       }
       else {
         this.alertMessage = '오류가 발생했습니다. 다시 시도해주세요.'
         this.showAlert = true;
         this.isSendLoading = false;
-      }
-    },
-    isNumber: function(evt) {
-      evt = (evt) ? evt : window.event;
-      let charCode = (evt.which) ? evt.which : evt.keyCode;
-      if ((charCode > 31 && (charCode < 48 || charCode > 57)) && charCode !== 46) {
-        evt.preventDefault();
-      } else {
-        return true;
       }
     },
   }

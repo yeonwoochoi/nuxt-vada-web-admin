@@ -27,8 +27,11 @@ export default {
   },
   methods: {
     logout () {
-      //TODO: Logout 구현
-      this.$router.push('/login')
+      if (this.$auth.loggedIn) {
+        this.$store.commit('logout')
+        this.$auth.strategy.token.reset();
+        this.$auth.strategy.refreshToken.reset();
+      }
     }
   }
 }

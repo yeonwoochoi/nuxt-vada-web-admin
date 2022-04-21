@@ -813,7 +813,10 @@ export default {
     },
 
     createEnterpriseUser() {
-      alert("Create enterprise")
+      this.$notifier.showMessage({
+        content: '기업 회원이 등록되었습니다',
+        color: 'success'
+      })
     },
 
     showEnterpriseUserDetail(item) {

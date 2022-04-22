@@ -14,7 +14,7 @@
           v-if="$vuetify.breakpoint.mdAndDown"
           @click="drawer = !drawer"
         />
-        <p class="mb-0 font-weight-regular title">{{currentPath}}</p>
+        <p class="mb-0 font-weight-regular title" v-html="currentPath"/>
       </div>
       <div>
         <avatar-menu @logout="logout"/>
@@ -57,8 +57,9 @@ export default {
     },
     setCurrentPath() {
       let path = this.$router.currentRoute.path;
-      let arr = path.split('/')
-      let result = arr[arr.length-1].toUpperCase();
+      let length = path.length
+      let tempPath = path.substring(1, length).toUpperCase()
+      let result = tempPath.replace(/\//gi, "<span class='mx-2'>></span>")
       this.currentPath = !result ? 'MAIN' : result;
     }
   }

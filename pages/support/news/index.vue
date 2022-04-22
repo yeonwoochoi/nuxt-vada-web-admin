@@ -13,14 +13,50 @@
               <template v-slot:top>
                 <v-row align="center" justify="space-between" class="px-4 my-1">
                   <v-col cols="12" sm="3">
-                    <v-btn
-                      dark
-                      class="elevation-0 mt-md-2 mb-0"
-                      :color="baseColor"
-                      @click="createNews"
+                    <v-dialog
+                      v-model="isCreateDialogOpen"
+                      max-width="1000"
                     >
-                      추가
-                    </v-btn>
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-btn
+                          dark
+                          class="elevation-0 mt-md-2 mb-0"
+                          :color="baseColor"
+                          v-bind="attrs"
+                          v-on="on"
+                          @click="openCreateDialog"
+                        >
+                          추가
+                        </v-btn>
+                      </template>
+                      <confirmation-dialog
+                        @cancel="isCreateDialogOpen = false"
+                        @ok="createNews"
+                        :title="createDialogTitle"
+                        :is-active="isEntered"
+                      >
+                        <template v-slot:default>
+                          <v-textarea
+                            v-model="tempTitleForCreate"
+                            label="제목"
+                            rows="2"
+                            outlined
+                            no-resize
+                            clearable
+                          />
+                          <v-textarea
+                            v-model="tempContentForCreate"
+                            label="내용"
+                            rows="8"
+                            outlined
+                            no-resize
+                            auto-grow
+                            counter
+                            clearable
+                          />
+                        </template>
+                      </confirmation-dialog>
+                    </v-dialog>
                   </v-col>
                 </v-row>
               </template>
@@ -70,7 +106,7 @@
         </dashboard-card>
       </v-col>
       <v-col cols="12" class="my-2" id="scrollNewsTarget">
-        <dashboard-card :title="newsTitle" v-if="!!activeItem" :is-loading="updateLoading">
+        <dashboard-card :title="newsTitle" v-if="!!activeItem" :is-loading="updateLoading || createLoading || deleteLoading">
           <template v-slot:default>
             <v-row align="start" justify="space-around" class="full-width py-10 px-8">
 
@@ -115,6 +151,7 @@
                         v-on="on"
                         class="mr-4 font-weight-bold elevation-0"
                         :color="baseColor"
+                        @click="openUpdateDialog"
                       >
                         수정하기
                       </v-btn>
@@ -123,10 +160,11 @@
                       @cancel="isUpdateDialogOpen = false"
                       @ok="updateNews"
                       :title="updateDialogTitle"
+                      :is-active="isModified"
                     >
                       <template v-slot:default>
                         <v-textarea
-                          v-model="tempTitle"
+                          v-model="tempTitleForUpdate"
                           label="제목"
                           rows="2"
                           outlined
@@ -134,7 +172,7 @@
                           clearable
                         />
                         <v-textarea
-                          v-model="tempContent"
+                          v-model="tempContentForUpdate"
                           label="내용"
                           rows="8"
                           outlined
@@ -179,7 +217,7 @@ export default {
             content: item.content,
             created_at: created_at,
             view_count: item.view,
-            isDeleteDialogOpen: false
+            isDeleteDialogOpen: false,
           })
         }
         return {
@@ -235,7 +273,9 @@ export default {
       },
     ],
 
+    createLoading: false,
     updateLoading: false,
+    deleteLoading: false,
 
     activeItem: null,
     scrollOptions: {
@@ -244,66 +284,124 @@ export default {
       easing: 'easeInOutCubic'
     },
 
-    tempTitle: '',
-    tempContent: '',
+    tempTitleForCreate: '',
+    tempContentForCreate: '',
 
-    isDeleteDialogOpen: false,
+    tempTitleForUpdate: '',
+    tempContentForUpdate: '',
+
+    isCreateDialogOpen: false,
     isUpdateDialogOpen: false,
 
     deleteDialogTitle: '공지사항 삭제',
     deleteDialogContent: '정말 삭제하시겠습니까?',
-
+    createDialogTitle: '공지사항 생성',
     updateDialogTitle: '공지사항 수정',
   }),
   computed: {
     ...mapState({
       baseColor: 'baseColor'
     }),
-  },
-  watch: {
-    isUpdateDialogOpen: (val) => {
-      console.log(val)
-      console.log(this.activeItem)
-    }
+    isEntered() {
+      return !!this.tempTitleForCreate && !!this.tempContentForCreate
+    },
+    isModified() {
+      if (!this.activeItem) return false;
+      return this.tempTitleForUpdate !== this.activeItem.title || this.tempContentForUpdate !== this.activeItem.content
+    },
   },
   methods: {
-    createNews() {
-      // TODO: News create
-      alert("Create News!")
-    },
-
     showDetail(item) {
       this.activeItem = item;
       this.$vuetify.goTo("#scrollNewsTarget", this.scrollOptions)
     },
 
-    updateNews() {
-      // TODO: News update
+    openCreateDialog() {
+      this.tempTitleForCreate = ''
+      this.tempContentForCreate = ''
+    },
+
+    openUpdateDialog() {
+      if (!!this.activeItem) {
+        this.tempTitleForUpdate = this.activeItem.title;
+        this.tempContentForUpdate = this.activeItem.content;
+      }
+      else {
+        this.$notifier.showMessage({
+          content: '새로고침 후 다시 시도해주세요.',
+          color: 'error'
+        })
+      }
+    },
+
+    async createNews() {
+      this.createLoading = true;
+      let params = {
+        title: this.tempTitleForCreate,
+        content: this.tempContentForCreate
+      }
+      await this.$store.dispatch('news/create', params)
+        .then(
+          res => {
+            alert(`공지사항 생성 완료`)
+            this.createLoading = false;
+            this.$router.go(0)
+          },
+          err => {
+            this.$notifier.showMessage({
+              content: err,
+              color: 'error'
+            })
+            this.createLoading = false;
+            this.isCreateDialogOpen = false;
+          }
+        )
+    },
+
+    async updateNews() {
       this.updateLoading = true;
       let params = {
         id: this.activeItem.idx,
-        title: this.tempTitle,
-        content: this.tempContent
+        title: this.tempTitleForUpdate,
+        content: this.tempContentForUpdate
       }
-      this.$store.dispatch('news/update', params)
+      await this.$store.dispatch('news/update', params)
         .then(
           res => {
-            console.log(res)
-            alert(`업데이트 완료`)
+            alert(`공지사항 업데이트 완료`)
             this.updateLoading = false;
             this.activeItem = null;
             this.$router.go(0)
           },
           err => {
-            alert(err)
+            this.$notifier.showMessage({
+              content: err,
+              color: 'error'
+            })
             this.updateLoading = false;
+            this.isUpdateDialogOpen = false;
           }
         )
     },
 
-    deleteNews(item) {
-      // TODO: 나중에 서버통신해서 삭제해라
-      this.$router.go(0);
+    async deleteNews(item) {
+      this.deleteLoading = true;
+      await this.$store.dispatch('news/delete', item.idx)
+        .then(
+          res => {
+            alert(`공지사항 삭제 완료`)
+            this.deleteLoading = false;
+            this.$router.go(0)
+          },
+          err => {
+            this.$notifier.showMessage({
+              content: err,
+              color: 'error'
+            })
+            this.deleteLoading = false;
+            this.isDeleteDialogOpen = false;
+          }
+        )
     },
   },
 }

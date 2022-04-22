@@ -14,6 +14,7 @@
         color="green darken-1"
         text
         @click="onClickOkBtn"
+        :disabled="!isActive"
       >
         확인
       </v-btn>
@@ -40,6 +41,10 @@ export default {
       type: String,
       default: () => ''
     },
+    isActive: {
+      type: Boolean,
+      default: () => true
+    }
   },
   data: () => ({
     isClicked: false

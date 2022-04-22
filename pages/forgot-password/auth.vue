@@ -119,7 +119,7 @@ export default {
       redirect('/')
     }
     else if (!store.getters["user/getEmailForPwdReset"]) {
-      redirect('/membership/reset-password')
+      redirect('/forgot-password')
     }
     return {
       email: store.getters["user/getEmailForPwdReset"]

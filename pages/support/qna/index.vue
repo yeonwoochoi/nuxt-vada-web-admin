@@ -7,12 +7,16 @@
             <v-data-table
               class="full-size row-pointer"
               :headers="inquiryHeader"
-              :items="inquiryDataWithIndex"
+              :items="inquiryList"
               :mobile-breakpoint="960"
-              hide-default-footer
-              :items-per-page="itemsPerPage"
-              :loading="initLoading"
+              :loading="showDetailLoading"
             >
+              <template v-slot:top>
+                <v-checkbox
+                  v-model="showNotAnswered"
+                  label="답변하지 않은 목록보기"
+                ></v-checkbox>
+              </template>
               <template v-slot:item.title="{item}">
                 <td class="text-start ellipsis" style="max-width: 280px; font-size: 13px;">
                   <div class="ellipsis font-weight-medium">
@@ -38,21 +42,38 @@
                   상세보기 >
                 </v-btn>
               </template>
+              <template v-slot:item.delete="{item}">
+                <v-dialog
+                  v-model="item.isDeleteDialogOpen"
+                  max-width="350"
+                >
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-btn
+                      class="font-weight-bold elevation-0 pa-0 no-background-hover"
+                      :ripple="false"
+                      color="transparent"
+                      v-bind="attrs"
+                      v-on="on"
+                    >
+                      삭제하기 >
+                    </v-btn>
+                  </template>
+                  <confirmation-dialog
+                    @cancel="item.isDeleteDialogOpen = false"
+                    @ok="deleteQna(item)"
+                    :title="deleteDialogTitle"
+                    :comment="deleteDialogContent"
+                  />
+                </v-dialog>
+              </template>
             </v-data-table>
           </template>
         </dashboard-card>
       </v-col>
       <v-col cols="12" class="my-2" id="scrollInquiryTarget">
-        <dashboard-card :title="inquiryTitle" v-if="!!activeItem">
+        <dashboard-card :title="inquiryTitle" v-if="!!activeItem" :is-loading="submitLoading || deleteLoading">
           <template v-slot:default>
             <v-row align="start" justify="space-around" class="full-width py-10 px-8">
-
-              <v-col cols="12" sm="2" class="text-sm-center pb-0">
-                <p class="user-detail-header-font">문의유형</p>
-              </v-col>
-              <v-col cols="12" sm="9">
-                <p class="user-detail-content-font">{{ activeItem.type }}</p>
-              </v-col>
 
               <v-col cols="12" sm="2" class="text-sm-center pb-0">
                 <p class="user-detail-header-font">작성자</p>
@@ -94,7 +115,8 @@
               </v-col>
               <v-col cols="12" sm="9">
                 <v-textarea
-                  v-model="activeItem.answer.data"
+                  v-if="!activeItem.isAnswered"
+                  v-model="tempAnswer"
                   ref="answer"
                   label="답변"
                   rows="8"
@@ -104,8 +126,9 @@
                   counter
                   clearable
                 />
+                <p class="user-detail-content-font" v-else>{{activeItem.answer.data}}</p>
               </v-col>
-              <v-col cols="12">
+              <v-col cols="12" v-if="!activeItem.isAnswered">
                 <div class="full-width flex-end">
                   <v-btn
                     dark
@@ -130,14 +153,58 @@
 <script>
 import {mapState} from "vuex";
 import DashboardCard from "../../../components/Cards/DashboardCard";
+import ConfirmationDialog from "~/components/Dialog/ConfirmationDialog";
 
 export default {
   name: "qna",
-  components: {DashboardCard},
+  components: {DashboardCard, ConfirmationDialog},
+  asyncData({store}) {
+    return store.dispatch('enquire/readAll').then(
+      res => {
+        let result = []
+        for (let i = 0; i < res.length; i++) {
+          let item = res[i]
+
+          let created_at = item.updatedAt.split('T')[0]
+
+          let answer = {
+            data: '',
+            created_at: ''
+          }
+          if (!!item.answered) {
+            answer = {
+              data: item.answer,
+              created_at: item.answeredAt.split('T')[0],
+            }
+          }
+
+          result.push({
+            index: i+1,
+            idx: item.id,
+            userId: item.userId,
+            title: item.title,
+            content: item.content,
+            created_at: created_at,
+            answer: answer,
+            isAnswered: item.answered,
+            isDeleteDialogOpen: false,
+          })
+        }
+        return {
+          inquiryItems: result,
+          fetchError: null
+        }
+      },
+      err => {
+        return {
+          inquiryItems: [],
+          fetchError: err
+        }
+      }
+    )
+  },
   data: () => ({
     inquiryTitle: '고객문의목록',
-    inquiryItems: [],
-    itemsPerPage: 6,
     inquiryHeader: [
       {
         text: 'No',
@@ -145,13 +212,6 @@ export default {
         width: '8%',
         align: 'center',
         value: 'index'
-      },
-      {
-        text: '문의유형',
-        sortable: false,
-        width: '150px',
-        align: 'center',
-        value: 'type'
       },
       {
         text: '제목',
@@ -180,153 +240,117 @@ export default {
         value: 'action',
         width: '12%'
       },
+      {
+        text: '삭제하기',
+        align: 'center',
+        sortable: false,
+        filterable: false,
+        value: 'delete',
+        width: '12%'
+      },
     ],
-    initLoading: true,
-    submitLoading: false,
     activeItem: null,
+
     scrollOptions: {
       duration: 800,
       offset: -80,
       easing: 'easeInOutCubic'
     },
+
+    showDetailLoading: false,
+    submitLoading: false,
+    deleteLoading: false,
+
+    tempAnswer: '',
+
+    deleteDialogTitle: '고객문의 삭제',
+    deleteDialogContent: '정말 삭제하시겠습니까?',
+
+    showNotAnswered: false
   }),
   computed: {
     ...mapState({
       baseColor: 'baseColor'
     }),
-    inquiryDataWithIndex() {
-      let result = [];
-      for (let i = 0; i < this.inquiryItems.length; i++){
-        let temp = this.inquiryItems[i];
-        if (!temp.answer) {
-          temp.answer = {
-            data: '',
-            created_at: ''
-          }
-        }
-        result.push({
-          ...temp,
-          index: i+1,
-          isAnswered: !!temp.answer.data
-        })
-      }
-      return result;
-    },
+    inquiryList() {
+      if (!this.inquiryItems) return []
+      return !this.showNotAnswered ? this.inquiryItems : this.inquiryItems.filter(item => !item.isAnswered)
+    }
   },
   methods: {
     getColor(isAnswered) {
       return isAnswered ? 'green' : 'red'
     },
-    async fetchData() {
-      setTimeout(() => {
-        // TODO: 서버 호출
-        this.inquiryItems = [
-          {
-            "type": "사용방법 문의",
-            "title": "포인트 신청은 어떻게 하나요?",
-            "content": "포인트 신청하고 싶은데 상단 바에도 들어가는 경로가 없네요. url을 첨부해주셔도 좋으니까 경로 접근 방법 부탁드려요.",
-            "created_at": "2022-03-04 13:14",
-            "author": "choi",
-            "answer": {
-              "data": "안녕하세요. blah blah",
-              "created_at": "2022-03-06 15:32"
-            }
-          },
-          {
-            "type": "사용방법 문의",
-            "title": "포인트 신청은 어떻게 하나요?",
-            "content": "포인트 신청하고 싶은데 상단 바에도 들어가는 경로가 없네요. url을 첨부해주셔도 좋으니까 경로 접근 방법 부탁드려요.",
-            "created_at": "2022-03-04 13:14",
-            "author": "choi",
-            "answer": {
-              "data": "안녕하세요. blah blah",
-              "created_at": "2022-03-06 15:32"
-            }
-          },
-          {
-            "type": "사용방법 문의",
-            "title": "포인트 신청은 어떻게 하나요?",
-            "content": "포인트 신청하고 싶은데 상단 바에도 들어가는 경로가 없네요. url을 첨부해주셔도 좋으니까 경로 접근 방법 부탁드려요.",
-            "created_at": "2022-03-04 13:14",
-            "author": "choi",
-            "answer": {
-              "data": "안녕하세요. blah blah",
-              "created_at": "2022-03-06 15:32"
-            }
-          },
-          {
-            "type": "사용방법 문의",
-            "title": "포인트 신청은 어떻게 하나요?포인트 신청은 어떻게 하나요?포인트 신청은 어떻게 하나요?포인트 신청은 어떻게 하나요?포인트 신청은 어떻게 하나요?포인트 신청은 어떻게 하나요?포인트 신청은 어떻게 하나요?",
-            "content": "포인트 신청하고 싶은데 상단 바에도 들어가는 경로가 없네요. url을 첨부해주셔도 좋으니까 경로 접근 방법 부탁드려요.",
-            "created_at": "2022-03-04 13:14",
-            "author": "choi",
-            "answer": null
-          },
-          {
-            "type": "사용방법 문의",
-            "title": "포인트 신청은 어떻게 하나요?",
-            "content": "포인트 신청하고 싶은데 상단 바에도 들어가는 경로가 없네요. url을 첨부해주셔도 좋으니까 경로 접근 방법 부탁드려요.",
-            "created_at": "2022-03-04 13:14",
-            "author": "choi",
-            "answer": null
-          },
-          {
-            "type": "사용방법 문의",
-            "title": "포인트 신청은 어떻게 하나요?",
-            "content": "포인트 신청하고 싶은데 상단 바에도 들어가는 경로가 없네요. url을 첨부해주셔도 좋으니까 경로 접근 방법 부탁드려요.",
-            "created_at": "2022-03-04 13:14",
-            "author": "choi",
-            "answer": {
-              "data": "안녕하세요. blah blah",
-              "created_at": "2022-03-06 15:32"
-            }
-          },
-          {
-            "type": "사용방법 문의",
-            "title": "포인트 신청은 어떻게 하나요?",
-            "content": "포인트 신청하고 싶은데 상단 바에도 들어가는 경로가 없네요. url을 첨부해주셔도 좋으니까 경로 접근 방법 부탁드려요.",
-            "created_at": "2022-03-04 13:14",
-            "author": "choi",
-            "answer": {
-              "data": "안녕하세요. blah blah",
-              "created_at": "2022-03-06 15:32"
-            }
-          },
-          {
-            "type": "사용방법 문의",
-            "title": "포인트 신청은 어떻게 하나요?",
-            "content": "포인트 신청하고 싶은데 상단 바에도 들어가는 경로가 없네요. url을 첨부해주셔도 좋으니까 경로 접근 방법 부탁드려요.",
-            "created_at": "2022-03-04 13:14",
-            "author": "choi",
-            "answer": null
-          },
-        ];
-        this.initLoading = false;
-      }, 1000)
+    async showDetail(item) {
+      this.showDetailLoading = true
+      this.tempAnswer = ''
+      await this.$store.dispatch("user/getUserByIdx", item.userId).then(
+        res => {
+          this.activeItem = {
+            ...item,
+            author: res.email
+          }
+          this.showDetailLoading = false
+          this.$vuetify.goTo("#scrollInquiryTarget", this.scrollOptions)
+        },
+        err => {
+          this.$notifier.showMessage({
+            content: err,
+            color: 'error'
+          })
+          this.showDetailLoading = false
+        }
+      )
     },
-    showDetail(item) {
-      this.activeItem = item;
-      this.$vuetify.goTo("#scrollInquiryTarget", this.scrollOptions)
-    },
-    submit() {
-      // TODO: 답변 제출
-      this.submitLoading = true;
-      if (!this.activeItem.answer.data) {
-        alert("값을 입력해주세요")
-        this.submitLoading = false;
-        return;
+    async submit() {
+      if (!this.tempAnswer) {
+        this.$notifier.showMessage({
+          content: "값을 입력해주세요",
+          color: 'error'
+        })
+        return
       }
-      setTimeout(() => {
-        this.activeItem.answer.created_at = new Date().toISOString().replace('T', ' ').substring(0, 19);
-        alert(`답변 완료 To: ${this.activeItem.author} + ${this.activeItem.answer.created_at}`)
-        this.activeItem = null
-        this.submitLoading = false;
-        this.$router.go(0)
-      }, 2000)
+      this.submitLoading = true;
+      let params = {
+        id: this.activeItem.idx,
+        answer: this.tempAnswer,
+      }
+      await this.$store.dispatch('enquire/answer', params)
+        .then(
+          res => {
+            alert(`고객문의 답변 완료`)
+            this.submitLoading = false;
+            this.activeItem = null;
+            this.$router.go(0)
+          },
+          err => {
+            this.$notifier.showMessage({
+              content: err,
+              color: 'error'
+            })
+            this.submitLoading = false;
+          }
+        )
+    },
+    async deleteQna(item) {
+      this.deleteLoading = true;
+      await this.$store.dispatch('enquire/delete', item.idx)
+        .then(
+          res => {
+            alert(`고객문의 삭제 완료`)
+            this.deleteLoading = false;
+            this.$router.go(0)
+          },
+          err => {
+            this.$notifier.showMessage({
+              content: err,
+              color: 'error'
+            })
+            this.deleteLoading = false;
+            this.isDeleteDialogOpen = false;
+          }
+        )
     }
-  },
-  mounted() {
-    this.fetchData()
   },
 }
 </script>

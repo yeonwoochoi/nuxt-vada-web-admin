@@ -473,8 +473,6 @@ export default {
     },
 
     customFilter(items, search, filter) {
-      console.dir(items)
-      console.dir(search)
       if (!search || !items) return items;
       if (items.email.includes(search) || items.username.includes(search) || items.phone.includes(search)) {
         return items;

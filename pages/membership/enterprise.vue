@@ -865,7 +865,6 @@ export default {
     },
 
     reissuedPassword(item) {
-      console.log(item.isApproved)
       item.isLoading = true;
       setTimeout(() => {
         item.isLoading = false;

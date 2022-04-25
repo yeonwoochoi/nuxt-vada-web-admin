@@ -7,11 +7,12 @@
             <v-data-table
               class="full-width"
               :headers="privateUserInfoTableHeader"
-              :items="privateUserInfoTableItems"
-              :items-per-page="itemsPerPage"
-              :loading="initLoading"
-              hide-default-footer
+              :items="userList"
               :mobile-breakpoint="600"
+              item-key="content.idx"
+              :no-data-text="noDataText"
+              :custom-filter="customFilter"
+              :search="search"
             >
               <template v-slot:top>
                 <v-row align="center" justify="space-between" class="px-4 my-1">
@@ -114,18 +115,6 @@
                   />
                 </v-dialog>
               </template>
-              <template v-slot:footer>
-                <v-pagination
-                  v-model="page"
-                  :length="totalPage"
-                  :color="baseColor"
-                  total-visible="10"
-                  prev-icon="mdi-menu-left"
-                  next-icon="mdi-menu-right"
-                  class="my-6"
-                  @input="changePage"
-                />
-              </template>
             </v-data-table>
           </template>
         </dashboard-card>
@@ -133,9 +122,7 @@
       <v-col cols="12" class="my-2" id="scrollTarget">
         <dashboard-card v-if="activeUser" :title="privateUserInfoDetailCardTitle">
           <template v-slot:default>
-            <v-row align="start" justify="space-around" class="full-width py-10 px-8">
-
-              <v-col cols="12" class="py-2"><v-divider/></v-col>
+            <v-row align="start" justify="space-around" class="full-width py-16 px-14">
 
               <v-col cols="12" sm="2" class="text-sm-center pb-0">
                 <p class="user-detail-header-font">이메일</p>
@@ -215,8 +202,6 @@
               <v-col cols="12" sm="9">
                 <p class="user-detail-content-font">{{ activeUser.pass_expiration_at }}</p>
               </v-col>
-
-              <v-col cols="12" class="py-2"><v-divider/></v-col>
 
               <v-col cols="12" class="mt-10" align="end">
                 <v-dialog
@@ -318,12 +303,55 @@ import {mapState} from "vuex";
 export default {
   name: "private",
   components: {ConfirmationDialog, DashboardCard},
+  asyncData({store}) {
+    return store.dispatch('user/getUsers', true).then(
+      res => {
+        let result = []
+        for (let i = 0; i < res.length; i++) {
+          let temp = res[i];
+          result.push({
+            no: i+1,
+            idx: temp['id'],
+            email: temp['email'],
+            username: temp['fullName'],
+            phone: temp['phoneNumber'],
+            point: temp['leftReport'],
+            isDeleteDialogOpen: false,
+            //TODO: 이 밑에 있는 데이터 요구하든지 없애든지 하셈
+            last_login_at: '2024-03-23 10:35:42',
+            pass_expiration_at: '2024-03-23 10:35:42',
+            purchaseReportCount: i,
+            saveReportCount: i,
+          })
+        }
+        return {
+          userList: result,
+          fetchError: null
+        }
+      },
+      err => {
+        return {
+          userList: null,
+          fetchError: err
+        }
+      }
+    )
+  },
+  created() {
+    this.$store.commit('setSheetTitle', '공지사항')
+    if (!!this.fetchError) {
+      this.$notifier.showMessage({
+        content: this.fetchError,
+        color: 'error'
+      })
+    }
+  },
   data: () => ({
     privateUserInfoCardTitle: '개인회원정보',
     privateUserInfoTableHeader: [
       {
         text: 'No',
-        value: 'index',
+        value: 'no',
         sortable: false,
         align: 'center',
         width: '7%'
@@ -352,20 +380,14 @@ export default {
         width: '12%'
       },
     ],
-    privateUserInfoTableItems: [],
     privateUserInfoDetailCardTitle: '상세회원정보',
 
-    page: 1,
-    totalPage: 1,
     search: '',
     searchInputText: '',
-
-    itemsPerPage: 10,
 
     activeUser: null,
     activeUserPoint: 0,
 
-    initLoading: true,
     updatePointLoading: false,
 
     deleteDialogTitle: '회원 삭제',
@@ -381,6 +403,7 @@ export default {
 
     updatePointDialogOpen: false,
     updateYearPassDialogOpen: false,
+    noDataText: ''
   }),
   computed: {
     ...mapState({
@@ -388,9 +411,6 @@ export default {
     }),
     currentPath() {
       return this.$router.currentRoute.path;
-    },
-    getTotalPage() {
-      return Math.ceil(this.privateUserInfoTableItems.length / this.itemsPerPage);
     },
     confirmYearPassContent() {
       let currentDate = new Date()
@@ -414,17 +434,12 @@ export default {
   },
   methods: {
     fetchData() {
-      let currentPage = parseInt(this.$route.query.page)
-      this.page = !currentPage ? 1 : currentPage;
-      this.search = !this.$route.query.keyword ? '' : this.$route.query.keyword;
-      this.searchInputText = this.search
-
       // TODO: Fetch Data
       setTimeout(() => {
         // dialog open 에 관여할 변수를 row 마다 만들어줘야해서
         let sampleData = [
           {
-            index: 1,
+            idx: 1,
             email: 'rud527@naver.com',
             username: 'choi yeon woo',
             password: '123123a',
@@ -436,7 +451,7 @@ export default {
             saveReportCount: 5
           },
           {
-            index: 2,
+            idx: 2,
             email: 'rud527@naver.com',
             username: 'kim min jae',
             password: '123123a',
@@ -448,7 +463,7 @@ export default {
             saveReportCount: 5
           },
           {
-            index: 3,
+            idx: 3,
             email: 'rud527@naver.com',
             username: 'Lee nam kyu',
             password: '123123a',
@@ -460,7 +475,7 @@ export default {
             saveReportCount: 5
           },
           {
-            index: 4,
+            idx: 4,
             email: 'rud527@naver.com',
             username: 'Cho sung jin',
             password: '123123a',
@@ -479,33 +494,14 @@ export default {
             isDeleteDialogOpen: false
           })
         }
-        this.privateUserInfoTableItems = result;
+        this.userList = result;
 
-        this.totalPage = this.getTotalPage;
-        this.initLoading = false
       }, 1000)
-    },
-
-    changePage() {
-      let query = !this.search
-        ? {page: this.page}
-        : {page: this.page, keyword: this.search};
-      this.$router.push({
-        path: this.currentPath,
-        query: query
-      })
     },
 
     onClickSearchBtn() {
       this.search = this.searchInputText
-      this.page = 1;
-      this.$router.push({
-        path: this.currentPath,
-        query: {
-          page: this.page,
-          keyword: this.search,
-        }
-      })
+      this.noDataText = !!this.search ? '검색결과 없음' : ''
     },
 
     createPrivateUser() {
@@ -540,11 +536,18 @@ export default {
         this.activeUser = null
         this.$router.go(0);
       }, 2000)
+    },
+
+    customFilter(items, search, filter) {
+      console.dir(items)
+      console.dir(search)
+      if (!search || !items) return items;
+      if (items.email.includes(search) || items.username.includes(search) || items.phone.includes(search)) {
+        return items;
+      }
+      return null
     }
   },
-  mounted() {
-    this.fetchData()
-  }
 }
 </script>
 

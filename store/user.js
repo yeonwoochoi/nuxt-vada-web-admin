@@ -16,6 +16,47 @@ export const mutations = {
 }
 
 export const actions = {
+  getUsers({commit}, isPersonal) {
+    return new Promise(((resolve, reject) => {
+      this.$axios.$get('/user').then(
+        res => {
+          let users = res['users']
+          if (!users) {
+            resolve([])
+          }
+          else {
+            let result = []
+            for (let i = 0; i < users.length; i++) {
+              if (!!isPersonal) {
+                if (users[i].rules.includes("ROLE_PERSONAL_USER")) {
+                  result.push(users[i])
+                }
+              }
+              else {
+                if (users[i].rules.includes("ROLE_ENTERPRISE_MANAGER_USER") || users[i].rules.includes("ROLE_ENTERPRISE_USER")) {
+                  result.push(users[i])
+                }
+              }
+            }
+            resolve(result)
+          }
+        })
+        .catch(err => {
+          reject(err.response.data.message)
+        })
+    }))
+  },
+  getUserByIdx({commit}, params) {
+    return new Promise((resolve, reject) => {
+      this.$axios.$get('/user/' + params)
+        .then(res => {
+          resolve(res.user)
+        })
+        .catch(err => {
+          reject(err.response.data.message)
+        })
+    })
+  },
   sendEmailAuthCode({commit}, params) {
     return new Promise((resolve, reject) => {
       this.$axios.$post('/email', params)

@@ -28,12 +28,12 @@ export const actions = {
             let result = []
             for (let i = 0; i < users.length; i++) {
               if (!!isPersonal) {
-                if (users[i].rules.includes("ROLE_PERSONAL_USER")) {
+                if (users[i].roles.includes("ROLE_PERSONAL_USER")) {
                   result.push(users[i])
                 }
               }
               else {
-                if (users[i].rules.includes("ROLE_ENTERPRISE_MANAGER_USER") || users[i].rules.includes("ROLE_ENTERPRISE_USER")) {
+                if (users[i].roles.includes("ROLE_ENTERPRISE_MANAGER_USER") || users[i].roles.includes("ROLE_ENTERPRISE_USER")) {
                   result.push(users[i])
                 }
               }

@@ -311,19 +311,17 @@ export default {
           let temp = res[i];
           result.push({
             no: i+1,
-            content: {
-              idx: temp['id'],
-              email: temp['email'],
-              username: temp['fullName'],
-              phone: temp['phoneNumber'],
-              point: temp['leftReport'],
-              isDeleteDialogOpen: false,
-              //TODO: 이 밑에 있는 데이터 요구하든지 없애든지 하셈
-              last_login_at: '2024-03-23 10:35:42',
-              pass_expiration_at: '2024-03-23 10:35:42',
-              purchaseReportCount: i,
-              saveReportCount: i,
-            }
+            idx: temp['id'],
+            email: temp['email'],
+            username: temp['fullName'],
+            phone: temp['phoneNumber'],
+            point: temp['leftReport'],
+            isDeleteDialogOpen: false,
+            //TODO: 이 밑에 있는 데이터 요구하든지 없애든지 하셈
+            last_login_at: '2024-03-23 10:35:42',
+            pass_expiration_at: '2024-03-23 10:35:42',
+            purchaseReportCount: i,
+            saveReportCount: i,
           })
         }
         return {
@@ -445,7 +443,7 @@ export default {
     },
 
     showPrivateUserDetail(item) {
-      this.activeUser = item.content
+      this.activeUser = item
       this.activeUserPoint = this.activeUser.point;
       this.$vuetify.goTo("#scrollTarget", this.scrollOptions)
     },

@@ -233,6 +233,15 @@ export default {
       }
     )
   },
+  created() {
+    this.$store.commit('setSheetTitle', '공지사항')
+    if (!!this.fetchError) {
+      this.$notifier.showMessage({
+        content: this.fetchError,
+        color: 'error'
+      })
+    }
+  },
   data: () => ({
     newsTitle: '공지사항',
     newsHeader: [

@@ -7,25 +7,16 @@
             <v-data-table
               class="full-width"
               :headers="enterpriseUserInfoTableHeader"
-              :items="enterpriseUserInfoTableItems"
-              :items-per-page="itemsPerPage"
-              :loading="initLoading"
-              hide-default-footer
+              :items="enterprises"
               :mobile-breakpoint="600"
+              item-key="no"
+              :no-data-text="noDataText"
+              :custom-filter="customFilter"
+              :search="search"
             >
               <template v-slot:top>
-                <v-row align="center" justify="space-between" class="px-4 my-1">
-                  <v-col cols="12" sm="3">
-                    <v-btn
-                      dark
-                      class="elevation-0 mt-md-4 mb-md-6"
-                      :color="baseColor"
-                      @click="createEnterpriseUser"
-                    >
-                      회원추가
-                    </v-btn>
-                  </v-col>
-                  <v-col cols="12" sm="6">
+                <v-row align="center" justify="end" class="px-4 my-1">
+                  <v-col cols="12" sm="6" class="my-4">
                     <div class="flex-center">
                       <v-text-field
                         v-model="searchInputText"
@@ -56,13 +47,19 @@
                     <v-col md="6" cols="12" class="pb-0">
                       <span>
                         <em class="mr-1">매니저 이메일</em>
-                        {{ item.managerEmail }}
+                        {{ item.managerInfo.email }}
                       </span>
                     </v-col>
                     <v-col md="6" cols="12" class="pb-0">
                       <span>
                         <em class="mr-1">매니저명</em>
-                        {{ item.managerName }}
+                        {{ item.managerInfo.fullName }}
+                      </span>
+                    </v-col>
+                    <v-col md="6" cols="12" class="pb-0">
+                      <span>
+                        <em class="mr-1">매니저연락처</em>
+                        {{ item.managerInfo.phoneNumber }}
                       </span>
                     </v-col>
                     <v-col md="6" cols="12" class="pb-0">
@@ -73,14 +70,8 @@
                     </v-col>
                     <v-col md="6" cols="12" class="pb-md-3">
                       <span>
-                        <em class="mr-1">포인트</em>
-                        {{ item.point }}
-                      </span>
-                    </v-col>
-                    <v-col md="6" cols="12" class="pb-3">
-                      <span>
-                        <em class="mr-1">1년권만료일</em>
-                        {{ item.pass_expiration_at }}
+                        <em class="mr-1">가입(신청)일</em>
+                        {{ item.created_at }}
                       </span>
                     </v-col>
                   </v-row>
@@ -130,18 +121,6 @@
                   />
                 </v-dialog>
               </template>
-              <template v-slot:footer>
-                <v-pagination
-                  v-model="page"
-                  :length="totalPage"
-                  :color="baseColor"
-                  total-visible="10"
-                  prev-icon="mdi-menu-left"
-                  next-icon="mdi-menu-right"
-                  class="my-6"
-                  @input="changePage"
-                />
-              </template>
             </v-data-table>
           </template>
         </dashboard-card>
@@ -179,16 +158,7 @@
                 <p class="user-detail-header-font">매니저 이메일</p>
               </v-col>
               <v-col cols="12" sm="9">
-                <p class="user-detail-content-font">{{ activeUser.managerEmail }}</p>
-              </v-col>
-
-              <v-col cols="12" class="py-2"><v-divider/></v-col>
-
-              <v-col cols="12" sm="2" class="text-sm-center pb-0">
-                <p class="user-detail-header-font">매니저 계정 비밀번호</p>
-              </v-col>
-              <v-col cols="12" sm="9">
-                <p class="user-detail-content-font">{{ activeUser.managerPassword }}</p>
+                <p class="user-detail-content-font">{{ activeUser.managerInfo.email }}</p>
               </v-col>
 
               <v-col cols="12" class="py-2"><v-divider/></v-col>
@@ -197,7 +167,16 @@
                 <p class="user-detail-header-font">매니저명</p>
               </v-col>
               <v-col cols="12" sm="9">
-                <p class="user-detail-content-font">{{ activeUser.managerName }}</p>
+                <p class="user-detail-content-font">{{ activeUser.managerInfo.fullName }}</p>
+              </v-col>
+
+              <v-col cols="12" class="py-2"><v-divider/></v-col>
+
+              <v-col cols="12" sm="2" class="text-sm-center pb-0">
+                <p class="user-detail-header-font">매니저 연락처</p>
+              </v-col>
+              <v-col cols="12" sm="9">
+                <p class="user-detail-content-font">{{ activeUser.managerInfo.phoneNumber }}</p>
               </v-col>
 
               <v-col cols="12" class="py-2"><v-divider/></v-col>
@@ -236,6 +215,7 @@
                       v-bind="attrs"
                       v-on="on"
                       style="letter-spacing: 1px; text-transform: none;"
+                      :disabled="updateYearPassLoading"
                     >
                       포인트 변경
                     </v-btn>
@@ -292,6 +272,7 @@
                       v-bind="attrs"
                       v-on="on"
                       style="letter-spacing: 1px; text-transform: none;"
+                      :loading="updateYearPassLoading"
                     >
                       1년권 부여
                     </v-btn>
@@ -320,6 +301,7 @@
                       v-bind="attrs"
                       v-on="on"
                       style="letter-spacing: 1px; text-transform: none;"
+                      :loading="approveSignUpLoading"
                     >
                       가입 승인
                     </v-btn>
@@ -346,14 +328,13 @@
                       :color="baseColor"
                       v-bind="attrs"
                       v-on="on"
-                      :disabled="!activeUser.isApproved"
                     >
-                      IP 추가
+                      회원추가
                     </v-btn>
                   </template>
                   <v-card style="height: fit-content" class="py-6 px-4">
                     <v-card-title class="text-h5" style="display: block">
-                      IP 추가
+                      회원추가
                       <v-divider class="mt-4 mb-1 pa-2"/>
                     </v-card-title>
                     <v-card-text>
@@ -365,6 +346,14 @@
                           filled
                           outlined
                           :rules="[rules.ip]"
+                        />
+                        <v-text-field
+                          v-model="newEmail"
+                          label="회원 이메일"
+                          flat
+                          filled
+                          outlined
+                          :rules="[rules.email]"
                         />
                       </v-form>
                     </v-card-text>
@@ -402,6 +391,16 @@
                   hide-default-footer
                   :mobile-breakpoint="600"
                 >
+                  <template v-slot:item.approved="{item}">
+                    <v-chip
+                      :color="getColor(item.approved)"
+                      dark
+                      :ripple="false"
+                      class="no-background-hover"
+                    >
+                      {{!item.approved ? '승인대기' : '승인완료'}}
+                    </v-chip>
+                  </template>
                   <template v-slot:item.update="{item}">
                     <v-btn
                       small
@@ -445,31 +444,32 @@
               </v-col>
 
               <v-col cols="12" class="flex-space-between mt-12">
-                <p class="title">사업자 등록증 이미지</p>
+                <p class="title">사업자 등록증 파일 (pdf)</p>
                 <div class="flex-center">
-                  <div class="filebox mr-2">
+                  <div class="filebox mr-4">
                     <label for="searchFile">
                       <v-icon color="green" size="25">mdi-file-upload</v-icon>
                       수정
                     </label>
                     <input
-                      ref="searchCsvFile"
+                      ref="selectPdfFile"
                       @change="searchByFile"
                       type="file"
                       id="searchFile"
-                      accept="image/*"
+                      accept="application/pdf"
                     >
                   </div>
-                  <download-button
-                    :link="activeUser.businessRegistrationFile"
+                  <button
+                    type="button"
+                    class="no-background-hover elevation-0 mx-2 subtitle-2 font-weight-bold"
+                    @click="downloadBusinessRegistrationFile"
+                    style="background-color: transparent; color: #666666; height: fit-content"
                   >
-                    <template>
-                        <span>
-                          <v-icon>mdi-file-download</v-icon>
-                          다운로드
-                        </span>
-                    </template>
-                  </download-button>
+                    <span>
+                      <v-icon>mdi-file-download</v-icon>
+                      양식 다운로드
+                    </span>
+                  </button>
                 </div>
               </v-col>
               <v-col cols="12">
@@ -491,13 +491,53 @@ import DownloadButton from "../../components/Buttons/DownloadButton";
 export default {
   name: "enterprise",
   components: {DownloadButton, ConfirmationDialog, DashboardCard},
+  async asyncData({$axios}) {
+    try {
+      let enterpriseInfo = await Promise.all([$axios.$get('/enterprise')])
+      let enterprises = enterpriseInfo[0]['enterprises']
+      let result = [];
+      for (let i = 0; i < enterprises.length; i++) {
+        let temp = enterprises[i]
+        let managerInfo = await Promise.all([$axios.$get('/user/' + temp['managerId'])])
+        result.push({
+          no: i + 1,
+          idx: temp['id'],
+          companyName: temp['organizationName'],
+          businessNumber: temp['organizationNumber'],
+          managerInfo: managerInfo[0]['user'],
+          isApproved: temp['approved'],
+          created_at: temp['createdAt'].split("T")[0],
+          isDeleteDialogOpen: false
+        })
+      }
+      return {
+        enterprises: result,
+        fetchError: null
+      }
+    }
+    catch (e) {
+      return {
+        enterprises: [],
+        fetchError: e
+      }
+    }
+  },
+  created() {
+    this.$store.commit('setSheetTitle', '기업회원정보')
+    if (!!this.fetchError) {
+      this.$notifier.showMessage({
+        content: this.fetchError,
+        color: 'error'
+      })
+    }
+  },
   data: () => ({
     enterpriseUserCardTitle: '기업회원정보',
     enterpriseUserInfoDetailCardTitle: '상세회원정보',
     enterpriseUserInfoTableHeader: [
       {
         text: 'No',
-        value: 'index',
+        value: 'no',
         sortable: false,
         align: 'center',
         width: '7%'
@@ -533,12 +573,11 @@ export default {
         width: '12%'
       },
     ],
-    enterpriseUserInfoTableItems: [],
 
     registeredIpTableHeader: [
       {
         text: 'No',
-        value: 'index',
+        value: 'no',
         sortable: false,
         align: 'center',
         width: '7%'
@@ -548,7 +587,7 @@ export default {
         align: 'start',
         sortable: false,
         filterable: false,
-        value: 'ip',
+        value: 'restrictedIp',
       },
       {
         text: '이메일',
@@ -558,11 +597,11 @@ export default {
         value: 'email',
       },
       {
-        text: '비밀번호',
+        text: '승인여부',
         align: 'start',
         sortable: false,
         filterable: false,
-        value: 'password',
+        value: 'approved',
       },
       {
         text: '재발급',
@@ -580,20 +619,16 @@ export default {
       },
     ],
 
-    initLoading: true,
     updatePointLoading: false,
+    updateYearPassLoading: false,
     addIpAddressLoading: false,
     approveSignUpLoading: false,
 
     activeUser: null,
     activeUserPoint: 0,
 
-    page: 1,
-    totalPage: 1,
     search: '',
     searchInputText: '',
-
-    itemsPerPage: 10,
 
     deleteDialogTitle: '기업 회원 삭제',
     deleteDialogContent: '바다 파트너스의 모든 데이터는 삭제됩니다. \n정말로 탈퇴하시겠습니까?',
@@ -618,7 +653,10 @@ export default {
     confirmSignUpDialogOpen: false,
 
     newIpAddress: '',
+    newEmail: '',
     newBusinessRegistrationFile: null,
+
+    noDataText: ''
   }),
   computed: {
     ...mapState({
@@ -627,14 +665,12 @@ export default {
     currentPath() {
       return this.$router.currentRoute.path;
     },
-    getTotalPage() {
-      return Math.ceil(this.enterpriseUserInfoTableItems.length / this.itemsPerPage);
-    },
     confirmYearPassContent() {
-      let currentDate = new Date()
-      let now = new Date().getUTCFullYear();
-      currentDate.setUTCFullYear(now + 1)
-      return `지금으로부터 1년 뒤인 ${currentDate.toISOString().slice(0, 10)} (UTC+0) 까지 1년권이 부여되며, 이미 1년권을 가진 회원의 경우 회원권이 1년 더 연장됩니다.`
+      let currentDate = this.$util.getCurrentDate()
+      let year = currentDate.getFullYear() + 1;
+      let month = currentDate.getMonth() + 1;
+      let date = currentDate.getDate();
+      return `지금으로부터 1년 뒤인 ${year}-${month}-${date} 까지 1년권이 부여되며, 이미 1년권을 가진 회원의 경우 중복 발급되지 않습니다.`
     },
     getIpCount() {
       if (!this.activeUser) return 0;
@@ -642,220 +678,128 @@ export default {
     },
     rules() {
       return {
-        ip: value => /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(value) || '유효하지 않은 IP 주소입니다.'
+        ip: value => /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(value) || '유효하지 않은 IP 주소입니다.',
+        email: value => {
+          const replaceV = value.replace(/(\s*)/g, '')
+          const pattern = /^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*.[a-zA-Z]{2,3}$/
+          return pattern.test(replaceV) || '이메일 형식으로 입력해주세요'
+        }
       }
     }
   },
   methods: {
-    async fetchData() {
-      let currentPage = parseInt(this.$route.query.page)
-      this.page = !currentPage ? 1 : currentPage;
-      this.search = !this.$route.query.keyword ? '' : this.$route.query.keyword;
-      this.searchInputText = this.search
-
-      // TODO: Fetch Data
-      setTimeout(() => {
-        // dialog open 에 관여할 변수를 row 마다 만들어줘야해서
-        let sampleData = [
-          {
-            index: 1,
-            companyName: 'Samsung',
-            businessNumber: '1231231231',
-            managerEmail: 'rud527@naver.com',
-            managerPassword: '123123123a',
-            managerName: 'choi yeon woo',
-            businessRegistrationFile: 'ai.kunsan.ac.kr:3000/uploads/files-1637042697203.pdf',
-            point: 14,
-            pass_expiration_at: '2023-03-23',
-            registeredIP: [
-              {
-                index: 1,
-                ip: '172.003.214.01',
-                email: 'rud532@naver.com',
-                password: '123123123a',
-
-              },
-            ],
-            isApproved: true
-          },
-          {
-            index: 2,
-            companyName: 'Samsung',
-            businessNumber: '1231231231',
-            managerEmail: 'rud527@naver.com',
-            managerPassword: '123123123a',
-            managerName: 'choi yeon woo',
-            businessRegistrationFile: 'https://cdn.vuetifyjs.com/images/parallax/material.jpg',
-            point: 14,
-            pass_expiration_at: '2023-03-23',
-            registeredIP: [
-              {
-                index: 1,
-                ip: '172.003.214.01',
-                email: 'rud532@naver.com',
-                password: '123123123a',
-
-              },
-              {
-                index: 2,
-                ip: '172.003.214.01',
-                email: 'rud532@naver.com',
-              },
-            ],
-            isApproved: true
-          },
-          {
-            index: 3,
-            companyName: 'Samsung',
-            businessNumber: '1231231231',
-            managerEmail: 'rud527@naver.com',
-            managerPassword: '123123123a',
-            managerName: 'choi yeon woo',
-            businessRegistrationFile: 'http://ai.kunsan.ac.kr:3000/uploads/files-1637042697203.pdf',
-            point: 14,
-            pass_expiration_at: '2023-03-23',
-            registeredIP: [
-              {
-                index: 1,
-                ip: '172.003.214.01',
-                email: 'rud532@naver.com',
-              },
-              {
-                index: 2,
-                ip: '172.003.214.01',
-                email: 'rud532@naver.com',
-              },
-            ],
-            isApproved: false
-          },
-          {
-            index: 4,
-            companyName: 'Samsung',
-            businessNumber: '1231231231',
-            managerEmail: 'rud527@naver.com',
-            managerPassword: '123123123a',
-            managerName: 'choi yeon woo',
-            businessRegistrationFile: 'https://cdn.vuetifyjs.com/images/parallax/material.jpg',
-            point: 14,
-            pass_expiration_at: '2023-03-23',
-            registeredIP: [
-              {
-                index: 1,
-                ip: '172.003.214.01',
-                email: 'rud532@naver.com',
-                password: '123123123a',
-              },
-              {
-                index: 2,
-                ip: '172.003.214.01',
-                email: 'rud532@naver.com',
-                password: '123123123a',
-              },
-              {
-                index: 3,
-                ip: '172.003.214.01',
-                email: 'rud532@naver.com',
-              },
-              {
-                index: 4,
-                ip: '172.003.214.01',
-                email: 'rud532@naver.com',
-                password: '123123123a',
-              },
-              {
-                index: 5,
-                ip: '172.003.214.01',
-                email: 'rud532@naver.com',
-              },
-            ],
-            isApproved: true
-          },
-        ];
-        let result = []
-        for (let i = 0; i < sampleData.length; i++) {
-          let temp = sampleData[i];
-          for (let j = 0; j < temp.registeredIP.length; j++) {
-            temp.registeredIP[j]['isDeleteDialogOpen'] = false
-            temp.registeredIP[j]['isLoading'] = false
-          }
-          result.push({
-            ...sampleData[i],
-            isDeleteDialogOpen: false
-          })
-        }
-        this.enterpriseUserInfoTableItems = result;
-
-        this.totalPage = this.getTotalPage;
-        this.initLoading = false
-      }, 1000)
-    },
-
-    changePage() {
-      let query = !this.search
-        ? {page: this.page}
-        : {page: this.page, keyword: this.search};
-      this.$router.push({
-        path: this.currentPath,
-        query: query
-      })
-    },
-
     onClickSearchBtn() {
       this.search = this.searchInputText
-      this.page = 1;
-      this.$router.push({
-        path: this.currentPath,
-        query: {
-          page: this.page,
-          keyword: this.search,
+      this.noDataText = !!this.search ? '검색결과 없음' : ''
+    },
+
+    async showEnterpriseUserDetail(item) {
+      await this.$store.dispatch('user/readEnterpriseUserByIndex', item.idx).then(
+        res => {
+          this.activeUser = {
+            ...item,
+            businessRegistrationFile: res['enterprise']['businessLicense'],
+            point: res['enterprise']['leftReport'],
+            pass_expiration_at: res['enterprisePass']['expired'] ? '-' : res['enterprisePass']['expiredAt'].split('T')[0],
+            registeredIP: !res['enterpriseUsers'] ? [] : res['enterpriseUsers'].map((obj, idx) => ({...obj, no: idx+1, isDeleteDialogOpen: false, isLoading: false})),
+          }
+          this.activeUserPoint = this.activeUser.point
+          this.$vuetify.goTo("#scrollTarget", this.scrollOptions)
+        },
+        err => {
+          this.$notifier.showMessage({
+            content: err,
+            color: 'error'
+          })
+          this.activeUser = null;
         }
-      })
+      )
     },
 
-    createEnterpriseUser() {
-      this.$notifier.showMessage({
-        content: '기업 회원이 등록되었습니다',
-        color: 'success'
-      })
-    },
-
-    showEnterpriseUserDetail(item) {
-      this.activeUser = item
-      this.activeUserPoint = this.activeUser.point
-      this.$vuetify.goTo("#scrollTarget", this.scrollOptions)
-    },
-
-    deleteEnterpriseUser(item) {
-      this.$router.go(0);
+    deleteEnterpriseUser({idx}) {
+      //TODO: 임시 개인 회원을 만들고 삭제해야하는데 현재 연구실 컴으로 메일 인증이 안되니 이따가 확인하기
+      this.$store.dispatch('user/deletePrivateUser', idx).then(
+        res => {
+          alert("회원 삭제 성공")
+          this.$router.go(0)
+        },
+        err => {
+          this.$notifier.showMessage({
+            content: err,
+            color: 'error'
+          })
+        }
+      )
     },
 
     deleteIP (item) {
       this.$router.go(0);
     },
 
-    updatePoint() {
+    async updatePoint() {
       this.updatePointLoading = true;
-      this.activeUser.point = this.activeUserPoint;
-
-      setTimeout(() => {
-        this.activeUser = null
-        this.activeUserPoint = 0
+      if (this.activeUser.point === this.activeUserPoint) {
+        this.$notifier.showMessage({
+          content: '값이 변경되지 않았습니다.',
+          color: 'error'
+        })
         this.updatePointLoading = false;
-        this.updatePointDialogOpen = false;
-        this.$router.go(0);
-      }, 2000)
+        return;
+      }
+
+      let payload = {
+        id: this.activeUser.idx,
+        report: this.activeUserPoint
+      }
+      await this.$store.dispatch('patent/updateEnterpriseUserPoint', payload).then(
+        res => {
+          alert("포인트가 변경되었습니다.")
+          this.activeUser.point = this.activeUserPoint
+          this.updatePointLoading = false;
+          this.updatePointDialogOpen = false;
+          this.$router.go(0);
+        },
+        err => {
+          this.$notifier.showMessage({
+            content: err,
+            color: 'error'
+          })
+          this.updatePointLoading = false;
+        }
+      )
     },
 
-    giveYearPass() {
-      setTimeout(() => {
-        this.activeUser = null
-        this.$router.go(0);
-      }, 2000)
+    async giveYearPass() {
+      this.updateYearPassLoading = true;
+      let payload = {
+        id: this.activeUser.idx
+      }
+      console.log(this.activeUser.idx)
+      await this.$store.dispatch('patent/updateEnterpriseUserYearPass', payload).then(
+        res => {
+          alert("1년권이 부여되었습니다.")
+          this.activeUser.point = this.activeUserPoint
+          this.updateYearPassLoading = false;
+          this.updateYearPassDialogOpen = false;
+          this.$router.go(0);
+        },
+        err => {
+          this.$notifier.showMessage({
+            content: err,
+            color: 'error'
+          })
+          this.updateYearPassLoading = false;
+        }
+      )
     },
 
     addIpAddress() {
       let v = this.$refs.addNewIpRefs.validate();
       if (!v) return;
+      let payload = {
+        email: this.newEmail,
+        ip: this.newIpAddress
+      }
       this.addIpAddressLoading = true;
       setTimeout(() => {
         this.activeUser = null
@@ -881,27 +825,56 @@ export default {
       this.newBusinessRegistrationFile = event.target.files[0]
     },
 
-    approveSignup() {
+    async approveSignup() {
       this.approveSignUpLoading = true;
-      setTimeout(() => {
-        this.approveSignUpLoading = false;
-        alert("approve sign up!")
-        this.$router.go(0);
-      }, 1000)
+      await this.$store.dispatch('user/approveEnterprise', this.activeUser.idx).then(
+        res => {
+          this.approveSignUpLoading = false;
+          alert("승인 완료")
+          this.$router.go(0);
+        },
+        err => {
+          this.$notifier.showMessage({
+            content: err,
+            color: 'error'
+          })
+          this.approveSignUpLoading = false;
+        }
+      )
     },
 
-    approveIpRegister(item) {
-      item.isLoading = true;
-      setTimeout(() => {
-        item.isLoading = false;
-        alert("approve ip success")
-        this.$router.go(0);
-      }, 1000)
-    }
+    customFilter(value, search, filter) {
+      if (!search || !value) return value;
+      if (filter.companyName.includes(search) || filter.businessNumber.includes(search) || filter.managerInfo.email.includes(search) || filter.managerInfo.fullName.includes(search)) {
+        return value;
+      }
+      return null
+    },
+
+    // TODO: 나중에 이기춘 api 요청하기
+    downloadBusinessRegistrationFile() {
+      let payload = {
+        id: this.activeUser.idx
+      }
+      this.$store.dispatch('patent/downloadBusinessFile', payload).then(
+        res => {
+          let blob = new Blob([res], {type: "application/pdf"});
+          let objectUrl = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = objectUrl;
+          link.setAttribute('download', 'business_registration_file.pdf');
+          document.body.appendChild(link);
+          link.click();
+        },
+        err => {
+          this.$notifier.showMessage({
+            content: err,
+            color: 'error'
+          })
+        }
+      )
+    },
   },
-  mounted() {
-    this.fetchData();
-  }
 }
 </script>
 

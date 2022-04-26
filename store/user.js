@@ -1,3 +1,5 @@
+import enterprise from "@/pages/membership/enterprise";
+
 export const state = () => ({
   emailForPwdReset: '',
 })
@@ -16,7 +18,7 @@ export const mutations = {
 }
 
 export const actions = {
-  getPrivateUsers({commit}) {
+  async getPrivateUsers({commit}) {
     return new Promise(((resolve, reject) => {
       this.$axios.$get('/user').then(
         res => {
@@ -39,7 +41,30 @@ export const actions = {
         })
     }))
   },
-  getUserByIdx({commit}, params) {
+  async readEnterpriseUserByIndex({commit}, param) {
+    return new Promise(((resolve, reject) => {
+      this.$axios.$get('/enterprise/' + param).then(
+        res => {
+          resolve(res)
+        })
+        .catch(err => {
+          reject(err.response.data.message)
+        })
+    }))
+  },
+  async approveEnterprise({commit}, param) {
+    return new Promise(((resolve, reject) => {
+      this.$axios.$put('/enterprise/' + param)
+        .then(res => {
+          resolve(res)
+        })
+        .catch(err => {
+          console.dir(err.response.data)
+          reject(err.response.data.message)
+        })
+    }))
+  },
+  async getUserByIdx({commit}, params) {
     return new Promise((resolve, reject) => {
       this.$axios.$get('/user/' + params)
         .then(res => {
@@ -50,7 +75,7 @@ export const actions = {
         })
     })
   },
-  sendEmailAuthCode({commit}, params) {
+  async sendEmailAuthCode({commit}, params) {
     return new Promise((resolve, reject) => {
       this.$axios.$post('/email', params)
         .then(res => {
@@ -61,7 +86,7 @@ export const actions = {
         })
     })
   },
-  validateEmailAuthCode({commit}, params) {
+  async validateEmailAuthCode({commit}, params) {
     return new Promise((resolve, reject) => {
       this.$axios.$put('/email', params)
         .then(res => {
@@ -72,7 +97,7 @@ export const actions = {
         })
     })
   },
-  changePassword({commit}, params) {
+  async changePassword({commit}, params) {
     return new Promise((resolve, reject) => {
       this.$axios.$put('/user/password/change', params)
         .then(res => {
@@ -83,7 +108,7 @@ export const actions = {
         })
     })
   },
-  deletePrivateUser({commit}, params) {
+  async deletePrivateUser({commit}, params) {
     return new Promise((resolve, reject) => {
       this.$axios.$delete('/user/' + params)
         .then(res => {

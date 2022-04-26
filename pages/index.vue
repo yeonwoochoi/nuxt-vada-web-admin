@@ -7,7 +7,7 @@
             <v-data-table
               class="full-size row-pointer"
               :headers="inquiryHeader"
-              :items="inquiryDataWithIndex"
+              :items="inquiryItems"
               :mobile-breakpoint="960"
               hide-default-footer
               :items-per-page="inquiryShowCount"
@@ -141,35 +141,108 @@ import {mapState} from "vuex";
 export default {
   name: "index",
   components: {LineChart, DashboardCard},
-  asyncData({store}) {
+  async asyncData({$axios}) {
+    //let getNewsItems = store.dispatch('news/readAll')
+    //let getEnquireItems = store.dispatch('enquire/readAll')
+    let getNewsItems = $axios.$get('/notice')
+    let getEnquireItems = $axios.$get('/enquire')
+    try {
+      let results = await Promise.all([getNewsItems, getEnquireItems])
+      let tempNewsItems = results[0]['notices']
+      let tempInquiryItems = results[1]['enquires']
+
+      let newsItems = []
+      for (let i = 0; i < tempNewsItems.length; i++) {
+        let item = tempNewsItems[i]
+        let time = item.updatedAt.split('T')[0]
+        newsItems.push({
+          no: i+1,
+          idx: item.id,
+          title: item.title,
+          content: item.content,
+          created_at: time,
+          view_count: item.view
+        })
+      }
+      let inquiryItems = [];
+      for (let i = 0; i < tempInquiryItems.length; i++) {
+        let item = tempInquiryItems[i]
+        if (!!item['answered']) continue;
+        let userInfo = await Promise.all([$axios.$get('/user/' + item['userId'])])
+        inquiryItems.push({
+          no: i+1,
+          title: item['title'],
+          author: userInfo[0]['user']['email'],
+          created_at: item.updatedAt.split('T')[0],
+          isAnswered: item['answered']
+        })
+      }
+
+      return {
+        newsItems: newsItems,
+        inquiryItems: inquiryItems,
+        fetchError: null
+      }
+    }
+    catch (e) {
+      return {
+        inquiryItems: [],
+        newsItems: [],
+        fetchError: e
+      }
+    }
+    /*
     return store.dispatch('news/readAll').then(
       res => {
-        let result = []
+        let newsItems = []
         for (let i = 0; i < res.length; i++) {
           let item = res[i]
           let time = item.updatedAt.split('T')[0]
-          let created_at = time.split('T')[0]
-          result.push({
+          newsItems.push({
             no: i+1,
             idx: item.id,
             title: item.title,
             content: item.content,
-            created_at: created_at,
+            created_at: time,
             view_count: item.view
           })
         }
-        return {
-          newsItems: result,
-          fetchError: null
-        }
+        store.dispatch('enquire/readAll').then(
+          res => {
+            let inquiryItems = [];
+            for (let i = 0; i < res.length; i++) {
+              let item = res[i]
+              inquiryItems.push({
+                no: i+1,
+                title: item['title'],
+                created_at: item.updatedAt.split('T')[0],
+                isAnswered: item['answered']
+              })
+            }
+            return {
+              inquiryItems: inquiryItems,
+              newsItems: newsItems,
+              fetchError: null
+            }
+          },
+          err => {
+            return {
+              inquiryItems: [],
+              newsItems: newsItems,
+              fetchError: err
+            }
+          }
+        )
       },
       err => {
         return {
+          inquiryItems: [],
           newsItems: [],
           fetchError: err
         }
       }
     )
+     */
   },
   data: () => ({
     inquiryTitle: '고객문의목록',
@@ -185,7 +258,6 @@ export default {
     dataLink: '/data',
     newsLink: '/support/news',
 
-    inquiryItems: [],
     salesItems: [],
     userCountItems: [],
     dataUpdateItems: [],
@@ -198,16 +270,9 @@ export default {
       {
         text: 'No',
         sortable: false,
-        width: '80px',
+        width: '120px',
         align: 'center',
-        value: 'index'
-      },
-      {
-        text: '문의유형',
-        sortable: false,
-        width: '150px',
-        align: 'center',
-        value: 'type'
+        value: 'no'
       },
       {
         text: '제목',
@@ -215,17 +280,24 @@ export default {
         value: 'title'
       },
       {
+        text: '문의자',
+        sortable: false,
+        align: 'center',
+        width: '300px',
+        value: 'author'
+      },
+      {
         text: '날짜',
         sortable: false,
         align: 'center',
-        width: '175px',
+        width: '200px',
         value: 'created_at'
       },
       {
         text: '답변여부',
         sortable: false,
         align: 'center',
-        width: '125px',
+        width: '200px',
         value: 'isAnswered'
       },
     ],
@@ -280,24 +352,12 @@ export default {
     ...mapState({
       baseColor: 'baseColor'
     }),
-    inquiryDataWithIndex() {
-      let result = [];
-      for (let i = 0; i < this.inquiryItems.length; i++){
-        let temp = this.inquiryItems[i];
-        result.push({
-          ...temp,
-          index: i+1,
-          isAnswered: !temp.answer
-        })
-      }
-      return result;
-    },
   },
   methods: {
     getColor(isAnswered) {
       return isAnswered ? 'green' : 'red'
     },
-    moveInquiryDetail({index}) {
+    moveInquiryDetail() {
       this.$router.push(this.inquiryLink)
     },
     moveNewsDetail({idx}) {
@@ -306,79 +366,6 @@ export default {
     async fetchData() {
       setTimeout(() => {
         // TODO: 서버 호출
-        this.inquiryItems = [
-          {
-            "type": "사용방법 문의",
-            "title": "포인트 신청은 어떻게 하나요?",
-            "content": "포인트 신청하고 싶은데 상단 바에도 들어가는 경로가 없네요. url을 첨부해주셔도 좋으니까 경로 접근 방법 부탁드려요.",
-            "created_at": "2022-03-04 13:14",
-            "answer": {
-              "data": "안녕하세요. blah blah",
-              "created_at": "2022-03-06 15:32"
-            }
-          },
-          {
-            "type": "사용방법 문의",
-            "title": "포인트 신청은 어떻게 하나요?",
-            "content": "포인트 신청하고 싶은데 상단 바에도 들어가는 경로가 없네요. url을 첨부해주셔도 좋으니까 경로 접근 방법 부탁드려요.",
-            "created_at": "2022-03-04 13:14",
-            "answer": {
-              "data": "안녕하세요. blah blah",
-              "created_at": "2022-03-06 15:32"
-            }
-          },
-          {
-            "type": "사용방법 문의",
-            "title": "포인트 신청은 어떻게 하나요?",
-            "content": "포인트 신청하고 싶은데 상단 바에도 들어가는 경로가 없네요. url을 첨부해주셔도 좋으니까 경로 접근 방법 부탁드려요.",
-            "created_at": "2022-03-04 13:14",
-            "answer": {
-              "data": "안녕하세요. blah blah",
-              "created_at": "2022-03-06 15:32"
-            }
-          },
-          {
-            "type": "사용방법 문의",
-            "title": "포인트 신청은 어떻게 하나요?포인트 신청은 어떻게 하나요?포인트 신청은 어떻게 하나요?포인트 신청은 어떻게 하나요?포인트 신청은 어떻게 하나요?포인트 신청은 어떻게 하나요?포인트 신청은 어떻게 하나요?",
-            "content": "포인트 신청하고 싶은데 상단 바에도 들어가는 경로가 없네요. url을 첨부해주셔도 좋으니까 경로 접근 방법 부탁드려요.",
-            "created_at": "2022-03-04 13:14",
-            "answer": null
-          },
-          {
-            "type": "사용방법 문의",
-            "title": "포인트 신청은 어떻게 하나요?",
-            "content": "포인트 신청하고 싶은데 상단 바에도 들어가는 경로가 없네요. url을 첨부해주셔도 좋으니까 경로 접근 방법 부탁드려요.",
-            "created_at": "2022-03-04 13:14",
-            "answer": null
-          },
-          {
-            "type": "사용방법 문의",
-            "title": "포인트 신청은 어떻게 하나요?",
-            "content": "포인트 신청하고 싶은데 상단 바에도 들어가는 경로가 없네요. url을 첨부해주셔도 좋으니까 경로 접근 방법 부탁드려요.",
-            "created_at": "2022-03-04 13:14",
-            "answer": {
-              "data": "안녕하세요. blah blah",
-              "created_at": "2022-03-06 15:32"
-            }
-          },
-          {
-            "type": "사용방법 문의",
-            "title": "포인트 신청은 어떻게 하나요?",
-            "content": "포인트 신청하고 싶은데 상단 바에도 들어가는 경로가 없네요. url을 첨부해주셔도 좋으니까 경로 접근 방법 부탁드려요.",
-            "created_at": "2022-03-04 13:14",
-            "answer": {
-              "data": "안녕하세요. blah blah",
-              "created_at": "2022-03-06 15:32"
-            }
-          },
-          {
-            "type": "사용방법 문의",
-            "title": "포인트 신청은 어떻게 하나요?",
-            "content": "포인트 신청하고 싶은데 상단 바에도 들어가는 경로가 없네요. url을 첨부해주셔도 좋으니까 경로 접근 방법 부탁드려요.",
-            "created_at": "2022-03-04 13:14",
-            "answer": null
-          },
-        ];
         this.salesItems = [80, 120, 105, 110, 95, 105, 90, 100, 80, 95, 70, 120];
         this.userCountItems = [10, 80, 165, 230, 380, 405, 590, 630, 700, 815, 960, 1030];
         this.dataUpdateItems = [

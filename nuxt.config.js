@@ -30,6 +30,7 @@ export default {
     { src: '~/plugins/vee-validate', ssr: false },
     { src: '~/plugins/axios' },
     { src: '~/plugins/notifier' },
+    { src: '~/plugins/utils.js' },
   ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components

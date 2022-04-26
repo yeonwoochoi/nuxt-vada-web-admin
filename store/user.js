@@ -16,7 +16,7 @@ export const mutations = {
 }
 
 export const actions = {
-  getPrivateUsers({commit}, isPersonal) {
+  getPrivateUsers({commit}) {
     return new Promise(((resolve, reject) => {
       this.$axios.$get('/user').then(
         res => {
@@ -27,15 +27,8 @@ export const actions = {
           else {
             let result = []
             for (let i = 0; i < users.length; i++) {
-              if (!!isPersonal) {
-                if (users[i].roles.includes("ROLE_PERSONAL_USER")) {
-                  result.push(users[i])
-                }
-              }
-              else {
-                if (users[i].roles.includes("ROLE_ENTERPRISE_MANAGER_USER") || users[i].roles.includes("ROLE_ENTERPRISE_USER")) {
-                  result.push(users[i])
-                }
+              if (users[i].roles.includes("ROLE_PERSONAL_USER")) {
+                result.push(users[i])
               }
             }
             resolve(result)

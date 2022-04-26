@@ -265,7 +265,7 @@ export default {
     )
   },
   created() {
-    this.$store.commit('setSheetTitle', '공지사항')
+    this.$store.commit('setSheetTitle', '개인회원정보')
     if (!!this.fetchError) {
       this.$notifier.showMessage({
         content: this.fetchError,

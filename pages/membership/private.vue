@@ -343,10 +343,6 @@ export default {
       this.noDataText = !!this.search ? '검색결과 없음' : ''
     },
 
-    createPrivateUser() {
-      alert('blah')
-    },
-
     showPrivateUserDetail(item) {
       this.activeUser = item
       this.activeUserPoint = this.activeUser.point;

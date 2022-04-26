@@ -14,7 +14,21 @@
           v-if="$vuetify.breakpoint.mdAndDown"
           @click="drawer = !drawer"
         />
-        <p class="mb-0 font-weight-regular title" v-html="currentPath"/>
+        <v-breadcrumbs
+          :items="currentPath"
+          large
+        >
+          <template v-slot:divider>
+            <v-icon>mdi-chevron-right</v-icon>
+          </template>
+          <template v-slot:item="{ item }">
+            <v-breadcrumbs-item :disabled="item.disabled" :href="item.href">
+              <span class="title font-weight-regular" :style="`color: ${item.color}`">
+                {{ item.text.toUpperCase() }}
+              </span>
+            </v-breadcrumbs-item>
+          </template>
+        </v-breadcrumbs>
       </div>
       <div>
         <avatar-menu @logout="logout"/>
@@ -28,19 +42,6 @@ import AvatarMenu from "../Dropdown/AvatarMenu";
 export default {
   name: "AppBar",
   components: {AvatarMenu},
-  created() {
-    this.setCurrentPath()
-  },
-  data: () => ({
-    currentPath: 'MAIN'
-  }),
-  watch: {
-    $route(to, from) {
-      if (to.path !== from.path) {
-        this.setCurrentPath()
-      }
-    }
-  },
   computed: {
     drawer: {
       get () {
@@ -50,18 +51,37 @@ export default {
         return this.$store.commit('setDrawer', value)
       }
     },
+    currentPath() {
+      let path = this.$router.currentRoute.path;
+      if (path === '/') {
+        return {
+          text: 'Main',
+          disabled: false,
+          href: '/',
+          color: 'black'
+        }
+      }
+      let length = path.length
+      let tempPath = path.substring(1, length)
+      let result = tempPath.split('/')
+      let link = ''
+      let breadcrumbs = []
+      for (let i = 0; i < result.length; i++) {
+        link += `/${result[i]}`
+        breadcrumbs.push({
+          text: result[i],
+          disabled: link === '/support' || link === '/membership',
+          href: link,
+          color: 'black'
+        })
+      }
+      return breadcrumbs
+    }
   },
   methods: {
     logout() {
       this.$emit('logout')
     },
-    setCurrentPath() {
-      let path = this.$router.currentRoute.path;
-      let length = path.length
-      let tempPath = path.substring(1, length).toUpperCase()
-      let result = tempPath.replace(/\//gi, "<span class='mx-2'>></span>")
-      this.currentPath = !result ? 'MAIN' : result;
-    }
   }
 }
 </script>

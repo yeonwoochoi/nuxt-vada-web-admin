@@ -19,7 +19,7 @@
       <v-card-actions class="flex-center">
         <v-btn
           x-large
-          href="/"
+          :to="this.$auth.loggedIn ? '/' : '/login'"
           :color="baseColor"
           class="white--text font-weight-bold mt-3"
           :width="200"

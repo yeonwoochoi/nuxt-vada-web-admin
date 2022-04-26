@@ -9,24 +9,14 @@
               :headers="privateUserInfoTableHeader"
               :items="userList"
               :mobile-breakpoint="600"
-              item-key="content.idx"
+              item-key="no"
               :no-data-text="noDataText"
               :custom-filter="customFilter"
               :search="search"
             >
               <template v-slot:top>
-                <v-row align="center" justify="space-between" class="px-4 my-1">
-                  <v-col cols="12" sm="3">
-                    <v-btn
-                      dark
-                      class="elevation-0 mt-md-4 mb-md-6"
-                      :color="baseColor"
-                      @click="createPrivateUser"
-                    >
-                      회원추가
-                    </v-btn>
-                  </v-col>
-                  <v-col cols="12" sm="6">
+                <v-row align="center" justify="end" class="px-4 my-1">
+                  <v-col cols="12" sm="6" class="my-4">
                     <div class="flex-center">
                       <v-text-field
                         v-model="searchInputText"
@@ -74,8 +64,8 @@
                     </v-col>
                     <v-col md="4" cols="12" class="pb-3">
                       <span>
-                        <em class="mr-1">마지막 로그인</em>
-                        {{ item.last_login_at }}
+                        <em class="mr-1">가입일</em>
+                        {{ item.created_at }}
                       </span>
                     </v-col>
                   </v-row>
@@ -134,15 +124,6 @@
               <v-col cols="12" class="py-2"><v-divider/></v-col>
 
               <v-col cols="12" sm="2" class="text-sm-center pb-0">
-                <p class="user-detail-header-font">비밀번호</p>
-              </v-col>
-              <v-col cols="12" sm="9">
-                <p class="user-detail-content-font">{{ activeUser.password }}</p>
-              </v-col>
-
-              <v-col cols="12" class="py-2"><v-divider/></v-col>
-
-              <v-col cols="12" sm="2" class="text-sm-center pb-0">
                 <p class="user-detail-header-font">회원명</p>
               </v-col>
               <v-col cols="12" sm="9">
@@ -161,28 +142,10 @@
               <v-col cols="12" class="py-2"><v-divider/></v-col>
 
               <v-col cols="12" sm="2" class="text-sm-center pb-0">
-                <p class="user-detail-header-font">마지막 로그인</p>
+                <p class="user-detail-header-font">가입일</p>
               </v-col>
               <v-col cols="12" sm="9">
-                <p class="user-detail-content-font">{{ activeUser.last_login_at }}</p>
-              </v-col>
-
-              <v-col cols="12" class="py-2"><v-divider/></v-col>
-
-              <v-col cols="12" sm="2" class="text-sm-center pb-0">
-                <p class="user-detail-header-font">구입한 보고서 수</p>
-              </v-col>
-              <v-col cols="12" sm="9">
-                <p class="user-detail-content-font">{{ activeUser.purchaseReportCount }}</p>
-              </v-col>
-
-              <v-col cols="12" class="py-2"><v-divider/></v-col>
-
-              <v-col cols="12" sm="2" class="text-sm-center pb-0">
-                <p class="user-detail-header-font">저장한 보고서 수</p>
-              </v-col>
-              <v-col cols="12" sm="9">
-                <p class="user-detail-content-font">{{ activeUser.saveReportCount }}</p>
+                <p class="user-detail-content-font">{{ activeUser.created_at }}</p>
               </v-col>
 
               <v-col cols="12" class="py-2"><v-divider/></v-col>
@@ -195,13 +158,6 @@
               </v-col>
 
               <v-col cols="12" class="py-2"><v-divider/></v-col>
-
-              <v-col cols="12" sm="2" class="text-sm-center pb-0">
-                <p class="user-detail-header-font">1년권 만료일</p>
-              </v-col>
-              <v-col cols="12" sm="9">
-                <p class="user-detail-content-font">{{ activeUser.pass_expiration_at }}</p>
-              </v-col>
 
               <v-col cols="12" class="mt-10" align="end">
                 <v-dialog
@@ -235,6 +191,7 @@
                         filled
                         hide-details
                         outlined
+                        @keypress="isNumber($event)"
                       />
                     </v-card-text>
                     <v-card-actions>
@@ -258,32 +215,6 @@
                       </v-btn>
                     </v-card-actions>
                   </v-card>
-                </v-dialog>
-                <v-dialog
-                  v-model="updateYearPassDialogOpen"
-                  max-width="400"
-                >
-                  <template v-slot:activator="{on, attrs}">
-                    <v-btn
-                      x-large
-                      dark
-                      class="font-weight-bold ma-1"
-                      :color="baseColor"
-                      width="200px"
-                      height="52px"
-                      v-bind="attrs"
-                      v-on="on"
-                      style="letter-spacing: 1px; text-transform: none;"
-                    >
-                      1년권 부여
-                    </v-btn>
-                  </template>
-                  <confirmation-dialog
-                    :title="confirmYearPassTitle"
-                    :comment="confirmYearPassContent"
-                    @cancel="updateYearPassDialogOpen = false"
-                    @ok="giveYearPass"
-                  />
                 </v-dialog>
               </v-col>
             </v-row>
@@ -316,12 +247,8 @@ export default {
             username: temp['fullName'],
             phone: temp['phoneNumber'],
             point: temp['leftReport'],
+            created_at: temp['createdAt'].split('T')[0],
             isDeleteDialogOpen: false,
-            //TODO: 이 밑에 있는 데이터 요구하든지 없애든지 하셈
-            last_login_at: '2024-03-23 10:35:42',
-            pass_expiration_at: '2024-03-23 10:35:42',
-            purchaseReportCount: i,
-            saveReportCount: i,
           })
         }
         return {
@@ -393,8 +320,6 @@ export default {
     deleteDialogTitle: '회원 삭제',
     deleteDialogContent: '바다 파트너스의 모든 데이터는 삭제됩니다. \n정말로 탈퇴하시겠습니까?',
 
-    confirmYearPassTitle: '1년 이용권 부여',
-
     scrollOptions: {
       duration: 800,
       offset: -80,
@@ -402,7 +327,6 @@ export default {
     },
 
     updatePointDialogOpen: false,
-    updateYearPassDialogOpen: false,
     noDataText: ''
   }),
   computed: {
@@ -412,25 +336,6 @@ export default {
     currentPath() {
       return this.$router.currentRoute.path;
     },
-    confirmYearPassContent() {
-      let currentDate = new Date()
-      let now = new Date().getUTCFullYear();
-      currentDate.setUTCFullYear(now + 1)
-      return `지금으로부터 1년 뒤인 ${currentDate.toISOString().slice(0, 10)} (UTC+0) 까지 1년권이 부여되며, 이미 1년권을 가진 회원의 경우 회원권이 1년 더 연장됩니다.`
-    },
-    activeUserInfo() {
-      return [
-        { title: '이메일', data: this.activeUser.email },
-        { title: '비밀번호', data: this.activeUser.password },
-        { title: '회원명', data: this.activeUser.username },
-        { title: '연락처', data: this.activeUser.phone },
-        { title: '마지막 로그인', data: this.activeUser.last_login_at },
-        { title: '구입한 보고서 수', data: this.activeUser.purchaseReportCount },
-        { title: '저장한 보고서 수', data: this.activeUser.saveReportCount },
-        { title: '포인트', data: this.activeUser.point },
-        { title: '1년권 만료일', data: this.activeUser.pass_expiration_at },
-      ]
-    }
   },
   methods: {
     onClickSearchBtn() {
@@ -448,37 +353,72 @@ export default {
       this.$vuetify.goTo("#scrollTarget", this.scrollOptions)
     },
 
-    deletePrivateUser(item) {
-      this.$router.go(0);
+    deletePrivateUser({idx}) {
+      //TODO: 임시 개인 회원을 만들고 삭제해야하는데 현재 연구실 컴으로 메일 인증이 안되니 이따가 확인하기
+      this.$store.dispatch('user/deletePrivateUser', idx).then(
+        res => {
+          alert("회원 삭제 성공")
+          this.$router.go(0)
+        },
+        err => {
+          this.$notifier.showMessage({
+            content: err,
+            color: 'error'
+          })
+        }
+      )
     },
 
-    updatePoint() {
+    async updatePoint() {
       this.updatePointLoading = true;
-      this.activeUser.point = this.activeUserPoint;
-
-      setTimeout(() => {
-        this.activeUser = null
-        this.activeUserPoint = 0;
+      if (this.activeUser.point === this.activeUserPoint) {
+        this.$notifier.showMessage({
+          content: '값이 변경되지 않았습니다.',
+          color: 'error'
+        })
         this.updatePointLoading = false;
-        this.updatePointDialogOpen = false;
-        this.$router.go(0);
-      }, 2000)
+        return;
+      }
+
+      let payload = {
+        id: this.activeUser.idx,
+        report: this.activeUserPoint
+      }
+      await this.$store.dispatch('patent/updatePrivateUserPoint', payload).then(
+        res => {
+          alert("포인트가 변경되었습니다.")
+          this.activeUser.point = this.activeUserPoint
+          this.updatePointLoading = false;
+          this.updatePointDialogOpen = false;
+          this.$router.go(0);
+        },
+        err => {
+          this.$notifier.showMessage({
+            content: err,
+            color: 'error'
+          })
+          this.updatePointLoading = false;
+        }
+      )
     },
 
-    giveYearPass() {
-      setTimeout(() => {
-        this.activeUser = null
-        this.$router.go(0);
-      }, 2000)
-    },
-
-    customFilter(items, search, filter) {
-      if (!search || !items) return items;
-      if (items.email.includes(search) || items.username.includes(search) || items.phone.includes(search)) {
-        return items;
+    customFilter(value, search, filter) {
+      if (!search || !value) return value;
+      if (filter.email.includes(search) || filter.username.includes(search) || filter.phone.includes(search)) {
+        return value;
       }
       return null
-    }
+    },
+
+    isNumber: function(evt) {
+      evt = (evt) ? evt : window.event;
+      let charCode = (evt.which) ? evt.which : evt.keyCode;
+      if ((charCode > 31 && (charCode < 48 || charCode > 57)) && charCode !== 46) {
+        evt.preventDefault();
+      } else {
+        return true;
+      }
+    },
   },
 }
 </script>

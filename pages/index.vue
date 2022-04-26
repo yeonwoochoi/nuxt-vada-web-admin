@@ -191,58 +191,6 @@ export default {
         fetchError: e
       }
     }
-    /*
-    return store.dispatch('news/readAll').then(
-      res => {
-        let newsItems = []
-        for (let i = 0; i < res.length; i++) {
-          let item = res[i]
-          let time = item.updatedAt.split('T')[0]
-          newsItems.push({
-            no: i+1,
-            idx: item.id,
-            title: item.title,
-            content: item.content,
-            created_at: time,
-            view_count: item.view
-          })
-        }
-        store.dispatch('enquire/readAll').then(
-          res => {
-            let inquiryItems = [];
-            for (let i = 0; i < res.length; i++) {
-              let item = res[i]
-              inquiryItems.push({
-                no: i+1,
-                title: item['title'],
-                created_at: item.updatedAt.split('T')[0],
-                isAnswered: item['answered']
-              })
-            }
-            return {
-              inquiryItems: inquiryItems,
-              newsItems: newsItems,
-              fetchError: null
-            }
-          },
-          err => {
-            return {
-              inquiryItems: [],
-              newsItems: newsItems,
-              fetchError: err
-            }
-          }
-        )
-      },
-      err => {
-        return {
-          inquiryItems: [],
-          newsItems: [],
-          fetchError: err
-        }
-      }
-    )
-     */
   },
   data: () => ({
     inquiryTitle: '고객문의목록',

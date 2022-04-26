@@ -90,4 +90,15 @@ export const actions = {
         })
     })
   },
+  deletePrivateUser({commit}, params) {
+    return new Promise((resolve, reject) => {
+      this.$axios.$delete('/user/' + params)
+        .then(res => {
+          resolve(res)
+        })
+        .catch(err => {
+          reject(err.response.data.message)
+        })
+    })
+  },
 }

@@ -16,7 +16,7 @@ export const mutations = {
 }
 
 export const actions = {
-  getUsers({commit}, isPersonal) {
+  getPrivateUsers({commit}, isPersonal) {
     return new Promise(((resolve, reject) => {
       this.$axios.$get('/user').then(
         res => {

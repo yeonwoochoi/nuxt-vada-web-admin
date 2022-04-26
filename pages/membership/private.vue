@@ -235,7 +235,7 @@ export default {
   name: "private",
   components: {ConfirmationDialog, DashboardCard},
   asyncData({store}) {
-    return store.dispatch('user/getUsers', true).then(
+    return store.dispatch('user/getPrivateUsers', true).then(
       res => {
         let result = []
         for (let i = 0; i < res.length; i++) {

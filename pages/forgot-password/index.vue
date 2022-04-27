@@ -14,7 +14,7 @@
             비밀번호 재설정
           </p>
           <p class="subtitle-2 white--text font-weight-regular mb-0">
-            인증코드는 등록된 휴대전화 번호로 전달됩니다.
+            인증코드는 입력하신 이메일로 전달됩니다.
           </p>
         </v-col>
         <v-col cols="10" class="mt-4">

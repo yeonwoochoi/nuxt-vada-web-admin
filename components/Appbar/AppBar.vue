@@ -42,6 +42,14 @@ import AvatarMenu from "../Dropdown/AvatarMenu";
 export default {
   name: "AppBar",
   components: {AvatarMenu},
+  data: () => ({
+    currentPath: [{
+      text: 'Main',
+      disabled: false,
+      href: '/',
+      color: 'black'
+    }]
+  }),
   computed: {
     drawer: {
       get () {
@@ -51,15 +59,26 @@ export default {
         return this.$store.commit('setDrawer', value)
       }
     },
-    currentPath() {
-      let path = this.$router.currentRoute.path;
+  },
+  watch: {
+    $route(to, from) {
+      this.setCurrentPath(to.path)
+    }
+  },
+  methods: {
+    logout() {
+      this.$emit('logout')
+    },
+    setCurrentPath(path) {
+      console.log(path)
       if (path === '/') {
-        return {
+        this.currentPath = [{
           text: 'Main',
           disabled: false,
           href: '/',
           color: 'black'
-        }
+        }]
+        return
       }
       let length = path.length
       let tempPath = path.substring(1, length)
@@ -75,13 +94,8 @@ export default {
           color: 'black'
         })
       }
-      return breadcrumbs
+      this.currentPath = breadcrumbs
     }
-  },
-  methods: {
-    logout() {
-      this.$emit('logout')
-    },
   }
 }
 </script>

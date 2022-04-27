@@ -367,7 +367,7 @@
                         @click="addIpAddress"
                         :loading="addIpAddressLoading"
                       >
-                        변경
+                        추가
                       </v-btn>
                       <v-btn
                         dark
@@ -444,22 +444,9 @@
                 </v-data-table>
               </v-col>
 
-              <v-col cols="12" class="mt-12">
+              <v-col cols="12" class="mt-12 flex-space-between">
                 <p class="title">사업자 등록증 파일 (pdf)</p>
                 <div class="flex-start mt-8 ml-4">
-                  <div class="filebox mr-4">
-                    <label for="searchFile">
-                      <v-icon color="green" size="25">mdi-file-upload</v-icon>
-                      수정
-                    </label>
-                    <input
-                      ref="selectPdfFile"
-                      @change="searchByFile"
-                      type="file"
-                      id="searchFile"
-                      accept="application/pdf"
-                    >
-                  </div>
                   <button
                     type="button"
                     class="no-background-hover elevation-0 mx-2 subtitle-2 font-weight-bold"
@@ -735,8 +722,12 @@ export default {
       )
     },
 
-    deleteIP ({userId}) {
-      this.$store.dispatch('user/deleteEnterpriseMember', userId).then(
+    deleteIP (item) {
+      let payload = {
+        enterpriseId: this.activeUser.idx,
+        userId: item.userId
+      }
+      this.$store.dispatch('user/deleteEnterpriseMember', payload).then(
         res => {
           alert("회원 삭제 성공")
           this.$router.go(0)
@@ -810,24 +801,47 @@ export default {
       let v = this.$refs.addNewIpRefs.validate();
       if (!v) return;
       let payload = {
-        email: this.newEmail,
-        ip: this.newIpAddress
+        enterpriseId: this.activeUser.idx,
+        ip: this.newIpAddress,
+        email: this.newEmail
       }
       this.addIpAddressLoading = true;
-      setTimeout(() => {
-        this.activeUser = null
-        this.addIpAddressLoading = false;
-        this.$router.go(0);
-      }, 2000)
+      this.$store.dispatch('user/addEnterpriseMember', payload).then(
+        res => {
+          this.activeUser = null
+          this.addIpAddressLoading = false;
+          this.$router.go(0);
+        },
+        err => {
+          this.$notifier.showMessage({
+            content: err,
+            color: 'error'
+          })
+          this.addIpAddressLoading = false;
+        }
+      )
     },
 
     reissuedPassword(item) {
       item.isLoading = true;
-      setTimeout(() => {
-        item.isLoading = false;
-        alert("reissuing success")
-        this.$router.go(0);
-      }, 1000)
+      let payload = {
+        enterpriseId: this.activeUser.idx,
+        userId: item.userId
+      }
+      this.$store.dispatch('user/reissuePassword', payload).then(
+        res => {
+          item.isLoading = false;
+          alert("임시 비밀번호 발급 성공")
+          this.$router.go(0);
+        },
+        err => {
+          this.$notifier.showMessage({
+            content: err,
+            color: 'error'
+          })
+          item.isLoading = false;
+        }
+      )
     },
 
     getColor(isApproved) {
@@ -864,10 +878,9 @@ export default {
       return null
     },
 
-    // TODO: 나중에 이기춘 api 요청하기
     downloadBusinessRegistrationFile() {
       let payload = {
-        id: this.activeUser.idx
+        organizationName: this.activeUser.companyName
       }
       this.$store.dispatch('patent/downloadBusinessFile', payload).then(
         res => {

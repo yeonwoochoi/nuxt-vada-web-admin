@@ -70,7 +70,6 @@ export default {
       this.$emit('logout')
     },
     setCurrentPath(path) {
-      console.log(path)
       if (path === '/') {
         this.currentPath = [{
           text: 'Main',

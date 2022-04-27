@@ -119,4 +119,26 @@ export const actions = {
         })
     })
   },
+  async deleteEnterpriseUser({commit}, params) {
+    return new Promise((resolve, reject) => {
+      this.$axios.$delete('/enterprise/' + params)
+        .then(res => {
+          resolve(res)
+        })
+        .catch(err => {
+          reject(err.response.data.message)
+        })
+    })
+  },
+  async deleteEnterpriseMember({commit}, params) {
+    return new Promise((resolve, reject) => {
+      this.$axios.$delete('/enterprise/' + params)
+        .then(res => {
+          resolve(res)
+        })
+        .catch(err => {
+          reject(err.response.data.message)
+        })
+    })
+  },
 }

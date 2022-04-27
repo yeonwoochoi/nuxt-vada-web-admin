@@ -130,9 +130,31 @@ export const actions = {
         })
     })
   },
-  async deleteEnterpriseMember({commit}, params) {
+  async deleteEnterpriseMember({commit}, payload) {
     return new Promise((resolve, reject) => {
-      this.$axios.$delete('/enterprise/' + params)
+      this.$axios.$put('/enterprise-user', payload)
+        .then(res => {
+          resolve(res)
+        })
+        .catch(err => {
+          reject(err.response.data.message)
+        })
+    })
+  },
+  async addEnterpriseMember({commit}, payload) {
+    return new Promise((resolve, reject) => {
+      this.$axios.$post('/enterprise-user', payload)
+        .then(res => {
+          resolve(res)
+        })
+        .catch(err => {
+          reject(err.response.data.message)
+        })
+    })
+  },
+  async reissuePassword({commit}, payload) {
+    return new Promise((resolve, reject) => {
+      this.$axios.$put('/enterprise-user/reset', payload)
         .then(res => {
           resolve(res)
         })

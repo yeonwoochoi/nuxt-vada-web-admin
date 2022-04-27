@@ -350,7 +350,6 @@ export default {
     },
 
     deletePrivateUser({idx}) {
-      //TODO: 임시 개인 회원을 만들고 삭제해야하는데 현재 연구실 컴으로 메일 인증이 안되니 이따가 확인하기
       this.$store.dispatch('user/deletePrivateUser', idx).then(
         res => {
           alert("회원 삭제 성공")

@@ -31,6 +31,7 @@ export default {
         this.$store.commit('logout')
         this.$auth.strategy.token.reset();
         this.$auth.strategy.refreshToken.reset();
+        this.$router.go(0)
       }
     }
   }

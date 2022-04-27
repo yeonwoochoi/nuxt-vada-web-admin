@@ -39,7 +39,7 @@ export const actions = {
         })
     }))
   },
-  async downloadTemplateFile({commit}, params) {
+  async downloadBusinessFile({commit}, payload) {
     const config = {
       headers: {
         'Content-Type': 'application/json',
@@ -47,7 +47,7 @@ export const actions = {
       responseType: "arraybuffer",
     }
     return new Promise(((resolve, reject) => {
-      this.$axios.$get('/file/template?type=' + params, config).then(res => {
+      this.$axios.$post('/file/download/license', payload, config).then(res => {
         resolve(res)
       }).catch(err => {
         reject(err.response.data.message)

@@ -59,6 +59,7 @@
             large
             rounded
             class="text-center black--text font-weight-bold subtitle-1 #DCDCDC full-width"
+            :loading="isLoading"
           >
             로그인
           </v-btn>
@@ -87,6 +88,7 @@ export default {
     showPassword: false,
     showAlert: false,
     alertMessage: '올바른 비밀번호를 입력해 주십시오.',
+    isLoading: false,
   }),
   computed: {
     valid() {
@@ -112,19 +114,23 @@ export default {
   },
   methods: {
     async login() {
+      this.isLoading = true;
       if (this.valid) {
-        this.$auth.loginWith('local', {data: { email: this.adminId, password: this.password }})
+        await this.$auth.loginWith('local', {data: { email: this.adminId, password: this.password }})
           .then(res => {
+            this.isLoading = false;
             this.$router.push('/')
           })
           .catch(err => {
             this.alertMessage = err.response.data['message']
             this.showAlert = true;
+            this.isLoading = false;
           })
         this.$router.push('/')
       }
       else {
         this.showAlert = true;
+        this.isLoading = false;
       }
     }
   }

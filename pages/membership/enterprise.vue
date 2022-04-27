@@ -318,6 +318,7 @@
               <v-col cols="12" class="flex-space-between mt-12">
                 <p class="title">등록 IP 목록</p>
                 <v-dialog
+                  v-if="activeUser.isApproved"
                   v-model="addIpAddressDialogOpen"
                   max-width="400"
                 >
@@ -443,9 +444,9 @@
                 </v-data-table>
               </v-col>
 
-              <v-col cols="12" class="flex-space-between mt-12">
+              <v-col cols="12" class="mt-12">
                 <p class="title">사업자 등록증 파일 (pdf)</p>
-                <div class="flex-center">
+                <div class="flex-start mt-8 ml-4">
                   <div class="filebox mr-4">
                     <label for="searchFile">
                       <v-icon color="green" size="25">mdi-file-upload</v-icon>
@@ -471,9 +472,6 @@
                     </span>
                   </button>
                 </div>
-              </v-col>
-              <v-col cols="12">
-                <img :src="activeUser.businessRegistrationFile" style="min-height: 128px; max-height: 200px;" alt="businessRegistrationFile"/>
               </v-col>
             </v-row>
           </template>
@@ -696,11 +694,17 @@ export default {
     async showEnterpriseUserDetail(item) {
       await this.$store.dispatch('user/readEnterpriseUserByIndex', item.idx).then(
         res => {
+          let passExpirationAt = '-'
+          if (Object.keys(res).includes('enterprisePass')) {
+            if (Object.keys(res['enterprisePass']).includes('expired')) {
+              passExpirationAt = res['enterprisePass']['expired'] ? '-' : res['enterprisePass']['expiredAt'].split('T')[0]
+            }
+          }
           this.activeUser = {
             ...item,
             businessRegistrationFile: res['enterprise']['businessLicense'],
             point: res['enterprise']['leftReport'],
-            pass_expiration_at: res['enterprisePass']['expired'] ? '-' : res['enterprisePass']['expiredAt'].split('T')[0],
+            pass_expiration_at: passExpirationAt,
             registeredIP: !res['enterpriseUsers'] ? [] : res['enterpriseUsers'].map((obj, idx) => ({...obj, no: idx+1, isDeleteDialogOpen: false, isLoading: false})),
           }
           this.activeUserPoint = this.activeUser.point
@@ -717,8 +721,7 @@ export default {
     },
 
     deleteEnterpriseUser({idx}) {
-      //TODO: 임시 개인 회원을 만들고 삭제해야하는데 현재 연구실 컴으로 메일 인증이 안되니 이따가 확인하기
-      this.$store.dispatch('user/deletePrivateUser', idx).then(
+      this.$store.dispatch('user/deleteEnterpriseUser', idx).then(
         res => {
           alert("회원 삭제 성공")
           this.$router.go(0)
@@ -732,8 +735,19 @@ export default {
       )
     },
 
-    deleteIP (item) {
-      this.$router.go(0);
+    deleteIP ({userId}) {
+      this.$store.dispatch('user/deleteEnterpriseMember', userId).then(
+        res => {
+          alert("회원 삭제 성공")
+          this.$router.go(0)
+        },
+        err => {
+          this.$notifier.showMessage({
+            content: err,
+            color: 'error'
+          })
+        }
+      )
     },
 
     async updatePoint() {
@@ -774,7 +788,6 @@ export default {
       let payload = {
         id: this.activeUser.idx
       }
-      console.log(this.activeUser.idx)
       await this.$store.dispatch('patent/updateEnterpriseUserYearPass', payload).then(
         res => {
           alert("1년권이 부여되었습니다.")

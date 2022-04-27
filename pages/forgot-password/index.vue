@@ -67,10 +67,8 @@
 </template>
 
 <script>
-import Card from "../../components/Cards/Card";
 export default {
   name: "ForgotPassword",
-  components: {Card},
   layout: 'auth',
   auth: false,
   asyncData({$auth, redirect, store}) {

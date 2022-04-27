@@ -109,7 +109,7 @@ export default {
       return true;
     },
     sideImg() {
-      return require('../../assets/login_side_img.jpg')
+      return require('../../assets/login_side_img.png')
     },
   },
   methods: {

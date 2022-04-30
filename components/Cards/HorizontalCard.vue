@@ -10,24 +10,24 @@
   >
     <div>
       <v-row align="center" justify="center">
-        <v-col cols="8" class="pb-0">
+        <v-col cols="12" sm="8" class="pb-0">
           <v-card-title
             class="text-h5 mb-2"
             v-text="title"
           />
           <v-card-subtitle>
             <p >마지막 업데이트: <span class="font-weight-bold subtitle-1 pl-1">{{updatedAt}}</span></p>
-            <p class="mb-0">데이터 수: <span class="font-weight-bold subtitle-1 pl-1">{{count}}</span></p>
+            <p class="mb-0">데이터 수: <span class="font-weight-bold subtitle-1 pl-1">{{count.toLocaleString()}}</span></p>
           </v-card-subtitle>
         </v-col>
-        <v-col cols="4">
+        <v-col cols="12" sm="4">
           <v-progress-circular
             :rotate="-90"
             :size="100"
             :width="15"
             :value="uploadPercentage"
             :color="color"
-            class="white--text"
+            class="white--text mx-0"
           >
             {{ uploadPercentage }}
           </v-progress-circular>
@@ -48,6 +48,7 @@
                 prepend-icon="mdi-file-upload"
                 outlined
                 :show-size="1000"
+                :disabled="isUpload || isDownload"
               >
                 <template v-slot:selection="{ text }">
                   <v-chip
@@ -161,12 +162,16 @@ export default {
         key: this.dataKey,
         file: this.uploadFile
       }
-      await this.$emit('upload', payload)
-      this.isUpload = false
+      await this.$emit('upload', payload, () => {
+        this.isUpload = false
+      })
     }
   }
 }
 </script>
 
 <style scoped>
+.v-progress-circular {
+  margin: 1rem;
+}
 </style>

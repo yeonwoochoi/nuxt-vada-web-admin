@@ -5,7 +5,7 @@
         <dashboard-card :title="header">
           <template v-slot:default>
             <v-row align="center" justify="start" class="pa-12">
-              <v-col cols="12" sm="12" md="6" lg="4" v-for="(data, index) in patentData" :key="`data-${index}`">
+              <v-col cols="12" md="6" lg="4" v-for="(data, index) in dataTypes" :key="`data-${index}`">
                 <horizontal-card
                   :title="data.title"
                   :updated-at="data.updated_at"
@@ -151,7 +151,7 @@ export default {
           'Content-Type': 'multipart/form-data',
         },
         onUploadProgress: function( progressEvent ) {
-          this.dataTypes[index].progress = parseInt( Math.round( ( progressEvent.loaded / progressEvent.total ) * 100 ) );
+          this.dataTypes[index].progress = parseInt(progressEvent.total) <= 0 ? '' : parseInt(Math.round((progressEvent.loaded / progressEvent.total) * 100));
         }.bind(this)
       }
 
@@ -167,10 +167,16 @@ export default {
             content: '파일 업로드 성공',
             color: 'success'
           })
+
+          let updatedIndex = this.dataTypes.findIndex(obj => obj.key === key)
+          this.dataTypes[updatedIndex]['count'] = res[`${this.getPatentFileLog(key)}`]['count']
+          this.dataTypes[updatedIndex]['updated_at'] = res[`${this.getPatentFileLog(key)}`]['updatedAt'].replace('T', ' ').split('.')[0]
+
           setTimeout(() => {
             this.dataTypes[index].progress = 0;
             callback()
           },this.resetTime)
+
         },
         err => {
           this.$notifier.showMessage({
@@ -191,22 +197,32 @@ export default {
           'Content-Type': 'application/json',
         },
         responseType: "arraybuffer",
-        onUploadProgress: function( progressEvent ) {
-          this.dataTypes[index].progress = parseInt( Math.round( ( progressEvent.loaded / progressEvent.total ) * 100 ) );
+        onDownloadProgress: function (progressEvent) {
+          this.dataTypes[index].progress = parseInt(progressEvent.total) <= 0 ? '' : parseInt(Math.round((progressEvent.loaded / progressEvent.total) * 100));
         }.bind(this)
       }
 
-      let payload = {
+      let data = {
         type: key,
         config: config
       }
 
-      await this.$store.dispatch('data/downloadFile', payload).then(
+      await this.$store.dispatch('data/downloadFile', data).then(
         res => {
+          let blob = new Blob([res], {type: "text/csv"});
+          let objectUrl = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = objectUrl;
+          let currentDate = this.$util.getCurrentStringDate().replaceAll('-', '_');
+          link.setAttribute('download', `${key.toLowerCase()}_${currentDate}.csv`);
+          document.body.appendChild(link);
+          link.click();
+
           this.$notifier.showMessage({
             content: '파일 다운로드 성공',
             color: 'success'
           })
+
           setTimeout(() => {
             this.dataTypes[index].progress = 0;
             callback()
@@ -222,6 +238,32 @@ export default {
         }
       )
     },
+    getPatentFileLog(key) {
+      switch (key) {
+        case 'CASH_FLOW':
+          return 'cashFlow'
+        case 'IPC_TCT':
+          return 'tct'
+        case 'ROYALTY_RATE':
+          return 'royaltyRate'
+        case 'INDUSTRY_ROYALTY_RATE':
+          return 'industryRoyaltyRate'
+        case 'INDUSTRY_TECH_ELEMENT':
+          return 'industryTechElement'
+        case 'INDUSTRY_PIONEER_AND_PERIOD':
+          return 'industryPioneerAndPeriod'
+        case 'DISCOUNT_RATE':
+          return 'discountRate'
+        case 'INDUSTRY_DISCOUNT_RATE':
+          return 'industryDiscountRate'
+        case 'RISK_PREMIUM':
+          return 'riskPremium'
+        case 'PATENT_PQI_GRADE':
+          return 'patentPQIGrade'
+        case 'ALL_INDUSTRY_SALES':
+          return 'allIndustrySales'
+      }
+    }
   },
 }
 </script>

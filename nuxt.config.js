@@ -99,13 +99,16 @@ export default {
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {
-    transpile: ['vee-validate/dist/rules']
+    transpile: ['vee-validate/dist/rules'],
   },
   server: {
     port: 8766,
-    host: '127.0.0.1'
+    host: '0.0.0.0'
   },
   axios: {
     baseURL: process.env.API_URL
+  },
+  env: {
+    NODE_ENV: process.env.NODE_ENV
   }
 }

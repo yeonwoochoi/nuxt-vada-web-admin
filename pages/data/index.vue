@@ -21,6 +21,34 @@
             </v-row>
           </template>
         </dashboard-card>
+        <dashboard-card :title="apiHeader" class="mt-12">
+          <template v-slot:default>
+            <v-row align="center" justify="center">
+              <v-col cols="3" v-if="$vuetify.breakpoint.smAndUp">
+                <v-subheader>키프리스 API</v-subheader>
+              </v-col>
+              <v-col cols="8" sm="7">
+                <v-text-field
+                  v-model="apiKey.kipris"
+                  label="KIPRIS"
+                  outlined
+                  :rules="[v=>!!v || '값을 입력해주세요.']"
+                  hide-details
+                />
+              </v-col>
+              <v-col cols="4" sm="2" md="1">
+                <v-btn
+                  class="mr-2 pa-1 font-weight-bold"
+                  @click="updateApiKey('kipris')"
+                  x-large
+                  solo
+                >
+                  변경
+                </v-btn>
+              </v-col>
+            </v-row>
+          </template>
+        </dashboard-card>
       </v-col>
     </v-row>
   </v-container>
@@ -113,7 +141,11 @@ export default {
             color: colorList[i]
           })
         }
+        // TODO: API KEY 받아오기
         return {
+          apiKey: {
+            kipris: ''
+          },
           dataTypes: result,
           fetchError: null
         }
@@ -121,7 +153,10 @@ export default {
       err => {
         return {
           dataTypes: [],
-          fetchError: err
+          apiKey: {
+            kipris: ''
+          },
+          fetchError: err,
         }
       }
     )
@@ -136,6 +171,7 @@ export default {
   },
   data: () => ({
     header: '데이터 관리',
+    apiHeader: 'API KEY 관리',
     newDataFile: null,
     resetTime: 1000,
   }),
@@ -263,6 +299,9 @@ export default {
         case 'ALL_INDUSTRY_SALES':
           return 'allIndustrySales'
       }
+    },
+    updateApiKey(key) {
+      console.log(this.apiKey[`${key}`])
     }
   },
 }

@@ -28,6 +28,13 @@ class Utils {
     const koreaTimeDiff = 9 * 60 * 60 * 1000;
     return new Date(utcNow + koreaTimeDiff)
   }
+  static getCurrentStringDate() {
+    const now = new Date();
+    const utcNow = now.getTime() + (now.getTimezoneOffset() * 60 * 1000);
+    const koreaTimeDiff = 9 * 60 * 60 * 1000;
+    let currentDate = new Date(utcNow + koreaTimeDiff)
+    return `${currentDate.getFullYear()}-${currentDate.getMonth() + 1}-${currentDate.getDate()}`
+  }
 }
 
 export default (context, inject) => {

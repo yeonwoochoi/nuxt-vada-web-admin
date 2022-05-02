@@ -169,12 +169,12 @@ export default {
           code: this.emailAuth
         }
         // 인증코드 확인
-        let params = {
+        let payload = {
           email: this.email,
           code: this.emailAuth,
           password: this.password
         }
-        await this.$store.dispatch('user/changePassword', params).then(
+        await this.$store.dispatch('user/changePassword', payload).then(
           res => {
             this.isLoading = false;
             this.showAlert = false;

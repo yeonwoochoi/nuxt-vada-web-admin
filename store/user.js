@@ -97,6 +97,17 @@ export const actions = {
         })
     })
   },
+  updateUser({commit}, payload) {
+    return new Promise((resolve, reject) => {
+      this.$axios.$put('/user', payload)
+        .then(res => {
+          resolve(res.user)
+        })
+        .catch(err => {
+          reject(err.response.data.message)
+        })
+    })
+  },
   async changePassword({commit}, params) {
     return new Promise((resolve, reject) => {
       this.$axios.$put('/user/password/change', params)

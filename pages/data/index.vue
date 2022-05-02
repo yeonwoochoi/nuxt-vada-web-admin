@@ -24,7 +24,7 @@
         <dashboard-card :title="apiHeader" class="mt-12">
           <template v-slot:default>
             <v-row align="center" justify="start" class="pa-12">
-              <v-col cols="12">
+              <v-col cols="12" class="mb-6">
                 <p class="mb-0 font-weight-bold headline">키프리스 API</p>
               </v-col>
               <v-col cols="2" v-if="$vuetify.breakpoint.smAndUp">
@@ -43,6 +43,7 @@
                   outlined
                   :rules="[v=>!!v || '값을 입력해주세요.']"
                   class="pt-8"
+                  ref="apiKeyRef"
                 />
               </v-col>
               <v-col cols="3" sm="2">
@@ -346,6 +347,7 @@ export default {
           })
           this.apiKey.kipris = newKey;
           this.newKiprisApiKey = ''
+          this.$refs.apiKeyRef.reset()
         },
         err => {
           this.$notifier.showMessage({

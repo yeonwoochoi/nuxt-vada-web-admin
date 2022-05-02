@@ -47,6 +47,7 @@
           </template>
         </dashboard-card>
       </v-col>
+      <!--
       <v-col cols="12" md="5" class="my-2 pr-md-5">
         <dashboard-card :title="dataTitle" :link="dataLink" :is-loading="loadingDataUpdateItems">
           <template v-slot:default>
@@ -78,7 +79,8 @@
           </template>
         </dashboard-card>
       </v-col>
-      <v-col cols="12" md="7" class="my-2 pl-md-5">
+      -->
+      <v-col cols="12" class="my-2 pl-md-5">
         <dashboard-card :title="newsTitle" :link="newsLink">
           <template v-slot:default>
             <v-data-table

@@ -263,7 +263,6 @@ export default {
         responseType: "arraybuffer",
         onDownloadProgress: function (progressEvent) {
           this.dataTypes[index].progress = parseInt(progressEvent.total) <= 0 ? '' : parseInt(Math.round((progressEvent.loaded / progressEvent.total) * 100));
-          console.log(`loaded: ${progressEvent.loaded}`)
         }.bind(this)
       }
 
@@ -274,7 +273,6 @@ export default {
 
       await this.$store.dispatch('data/downloadFile', data).then(
         res => {
-          console.log('response!')
           let blob = new Blob([res], {type: "text/csv"});
           let objectUrl = URL.createObjectURL(blob);
           const link = document.createElement('a');

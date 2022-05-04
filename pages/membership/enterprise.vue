@@ -320,7 +320,7 @@
                 <v-dialog
                   v-if="activeUser.isApproved"
                   v-model="addIpAddressDialogOpen"
-                  max-width="400"
+                  max-width="600"
                 >
                   <template v-slot:activator="{on, attrs}">
                     <v-btn
@@ -336,29 +336,76 @@
                   <v-card style="height: fit-content" class="py-6 px-4">
                     <v-card-title class="text-h5" style="display: block">
                       회원추가
-                      <v-divider class="mt-4 mb-1 pa-2"/>
+                      <v-divider class="mt-4 px-2 pt-2"/>
                     </v-card-title>
                     <v-card-text>
-                      <v-form ref="addNewIpRefs" lazy-validation>
-                        <v-text-field
-                          v-model="newIpAddress"
-                          label="IP 주소 (ex. 192.168.1.50)"
-                          flat
-                          filled
-                          outlined
-                          :rules="[rules.ip]"
-                        />
-                        <v-text-field
-                          v-model="newEmail"
-                          label="회원 이메일"
-                          flat
-                          filled
-                          outlined
-                          :rules="[rules.email]"
-                        />
-                      </v-form>
+                      <v-tabs v-model="addUserTab">
+                        <v-tab>
+                          입력
+                        </v-tab>
+                        <v-tab>
+                          파일
+                        </v-tab>
+                      </v-tabs>
+                      <v-tabs-items v-model="addUserTab" class="mt-10">
+                        <v-tab-item>
+                          <v-form ref="addNewIpRefs" lazy-validation>
+                            <v-text-field
+                              v-model="newIpAddress"
+                              label="IP 주소 (ex. 192.168.1.50)"
+                              flat
+                              filled
+                              outlined
+                              :rules="[rules.ip]"
+                            />
+                            <v-text-field
+                              v-model="newEmail"
+                              label="회원 이메일"
+                              flat
+                              filled
+                              outlined
+                              :rules="[rules.email]"
+                            />
+                          </v-form>
+                        </v-tab-item>
+                        <v-tab-item>
+                          <v-file-input
+                            v-model="addUserUploadFile"
+                            accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                            :color="baseColor"
+                            counter
+                            :label="label"
+                            placeholder="파일 찾기"
+                            prepend-icon="mdi-file-upload"
+                            outlined
+                            class="mt-2"
+                            :show-size="1000"
+                          >
+                            <template v-slot:selection="{ text }">
+                              <v-chip
+                                dark
+                                label
+                                small
+                                color="white"
+                                :style="`color: ${baseColor}`"
+                              >
+                                {{ text }}
+                              </v-chip>
+                            </template>
+                          </v-file-input>
+                        </v-tab-item>
+                      </v-tabs-items>
                     </v-card-text>
                     <v-card-actions>
+                      <v-btn
+                        v-if="addUserTab === 1"
+                        dark
+                        class="elevation-0"
+                        :color="baseColor"
+                        @click="downloadAddUserTemplateFile"
+                      >
+                        양식 다운로드
+                      </v-btn>
                       <v-spacer></v-spacer>
                       <v-btn
                         dark
@@ -382,7 +429,6 @@
                   </v-card>
                 </v-dialog>
               </v-col>
-
               <v-col cols="12" v-if="!!activeUser.registeredIP">
                 <v-data-table
                   class="full-width"
@@ -638,7 +684,11 @@ export default {
     newEmail: '',
     newBusinessRegistrationFile: null,
 
-    noDataText: ''
+    noDataText: '',
+
+    addUserTab: null,
+    addUserUploadFile: null,
+    label: 'csv 파일을 입력해주세요.'
   }),
   computed: {
     ...mapState({
@@ -779,26 +829,63 @@ export default {
       )
     },
 
-    addIpAddress() {
-      let v = this.$refs.addNewIpRefs.validate();
-      if (!v) return;
-      let payload = {
-        enterpriseId: this.activeUser.idx,
-        ip: this.newIpAddress,
-        email: this.newEmail
-      }
-      this.addIpAddressLoading = true;
-      this.$store.dispatch('user/addEnterpriseMember', payload).then(
-        res => {
-          this.activeUser = null
-          this.addIpAddressLoading = false;
-          this.$router.go(0);
-        },
-        err => {
-          this.$errorHandler.showMessage(err)
-          this.addIpAddressLoading = false;
+    async addIpAddress() {
+      if (this.addUserTab === 0) {
+        let v = this.$refs.addNewIpRefs.validate();
+        if (!v) return;
+        let payload = {
+          enterpriseId: this.activeUser.idx,
+          ip: this.newIpAddress,
+          email: this.newEmail
         }
-      )
+        this.addIpAddressLoading = true;
+        await this.$store.dispatch('user/addEnterpriseMember', payload).then(
+          res => {
+            this.activeUser = null
+            alert("추가되었습니다.")
+            this.addIpAddressLoading = false;
+            this.$router.go(0);
+          },
+          err => {
+            this.$errorHandler.showMessage(err)
+            this.addIpAddressLoading = false;
+          }
+        )
+      }
+      else if (this.addUserTab === 1) {
+        if (!this.addUserUploadFile) {
+          this.$notifier.showMessage({
+            content: '파일을 입력해주세요.',
+            color: 'error'
+          })
+          return;
+        }
+        this.addIpAddressLoading = true;
+        let formData = new FormData();
+        formData.append('ipEmailPair', this.addUserUploadFile);
+        let payload = {
+          id: this.activeUser.idx,
+          data: formData
+        }
+        await this.$store.dispatch('user/addUserByFile', payload).then(
+          res => {
+            this.activeUser = null
+            alert("추가되었습니다.")
+            this.addIpAddressLoading = false;
+            this.$router.go(0);
+          },
+          err => {
+            this.$errorHandler.showMessage(err)
+            this.addIpAddressLoading = false;
+          }
+        )
+      }
+      else {
+        this.$notifier.showMessage({
+          content: '오류가 발생했습니다. 새로고침 후 다시 시도해주세요.',
+          color: 'error'
+        })
+      }
     },
 
     reissuedPassword(item) {
@@ -870,6 +957,23 @@ export default {
         }
       )
     },
+
+    downloadAddUserTemplateFile() {
+      this.$store.dispatch('user/downloadTemplateFile', 'IpEmailPair').then(
+        res => {
+          let blob = new Blob([res], {type: "application/vnd.ms-excel"});
+          let objectUrl = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = objectUrl;
+          link.setAttribute('download', 'template.xls');
+          document.body.appendChild(link);
+          link.click();
+        },
+        err => {
+          this.$errorHandler.showMessage(err)
+        }
+      )
+    }
   },
 }
 </script>

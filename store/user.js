@@ -174,4 +174,34 @@ export const actions = {
         })
     })
   },
+  async downloadTemplateFile({commit}, params) {
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      responseType: "arraybuffer",
+    }
+    return new Promise(((resolve, reject) => {
+      this.$axios.$get('/file/template?type=' + params, config).then(res => {
+        resolve(res)
+      }).catch(err => {
+        reject(err.response.data)
+      })
+    }))
+  },
+  async addUserByFile({commit}, payload) {
+    return new Promise((resolve, reject) => {
+      this.$axios.$post('/enterprise-user/' + payload.id, payload.data, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        }
+      })
+        .then(res => {
+          resolve(res)
+        })
+        .catch(err => {
+          reject(err.response.data)
+        })
+    })
+  }
 }

@@ -131,10 +131,7 @@ export default {
   },
   created() {
     if (!!this.fetchError) {
-      this.$notifier.showMessage({
-        content: this.fetchError,
-        color: 'error'
-      })
+      this.$errorHandler.showMessage(this.fetchError)
     }
   },
   data: () => ({
@@ -179,10 +176,7 @@ export default {
             this.loading = false;
           },
           err => {
-            this.$notifier.showMessage({
-              content: err,
-              color: 'error'
-            })
+            this.$errorHandler.showMessage(err)
             this.loading = false;
           }
         )

@@ -6,7 +6,7 @@ export const actions = {
           resolve(res['patentFileLog'])
         })
         .catch(err => {
-          reject(err.response.data.message)
+          reject(err.response.data)
         })
     }))
   },
@@ -17,7 +17,7 @@ export const actions = {
           resolve(res['patentFileLog'])
         })
         .catch(err => {
-          reject(err.response.data.message)
+          reject(err.response.data)
         })
     })
   },
@@ -28,7 +28,7 @@ export const actions = {
           resolve(res)
         })
         .catch(err => {
-          reject(err.response.data.message)
+          reject(err.response.data)
         })
     })
   },
@@ -39,7 +39,7 @@ export const actions = {
           resolve(res['lastUpdatedAt'])
         })
         .catch(err => {
-          reject(err.response.data.message)
+          reject(err.response.data)
         })
     })
   },
@@ -50,7 +50,7 @@ export const actions = {
           resolve(res['apiKey'])
         })
         .catch(err => {
-          reject(err.response.data.message)
+          reject(err.response.data)
         })
     })
   },
@@ -61,7 +61,7 @@ export const actions = {
           resolve(res)
         })
         .catch(err => {
-          reject(err.response.data.message)
+          reject(err.response.data)
         })
     })
   },

@@ -60,10 +60,7 @@ export default {
   },
   created() {
     if (!!this.fetchError) {
-      this.$notifier.showMessage({
-        content: this.fetchError,
-        color: 'error'
-      })
+      this.$errorHandler.showMessage(this.fetchError)
     }
   },
   data: () => ({

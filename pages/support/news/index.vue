@@ -236,10 +236,7 @@ export default {
   created() {
     this.$store.commit('setSheetTitle', '공지사항')
     if (!!this.fetchError) {
-      this.$notifier.showMessage({
-        content: this.fetchError,
-        color: 'error'
-      })
+      this.$errorHandler.showMessage(this.fetchError)
     }
   },
   data: () => ({
@@ -357,10 +354,7 @@ export default {
             this.$router.go(0)
           },
           err => {
-            this.$notifier.showMessage({
-              content: err,
-              color: 'error'
-            })
+            this.$errorHandler.showMessage(err)
             this.createLoading = false;
             this.isCreateDialogOpen = false;
           }
@@ -383,10 +377,7 @@ export default {
             this.$router.go(0)
           },
           err => {
-            this.$notifier.showMessage({
-              content: err,
-              color: 'error'
-            })
+            this.$errorHandler.showMessage(err)
             this.updateLoading = false;
             this.isUpdateDialogOpen = false;
           }
@@ -403,10 +394,7 @@ export default {
             this.$router.go(0)
           },
           err => {
-            this.$notifier.showMessage({
-              content: err,
-              color: 'error'
-            })
+            this.$errorHandler.showMessage(err)
             this.deleteLoading = false;
             this.isDeleteDialogOpen = false;
           }

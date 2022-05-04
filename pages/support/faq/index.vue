@@ -219,9 +219,13 @@ export default {
       }
     )
   },
+  created() {
+    if (!!this.fetchError) {
+      this.$errorHandler.showMessage(this.fetchError)
+    }
+  },
   data: () => ({
     faqCardTitle: 'FAQ',
-
     faqHeaders: [
       {
         text: 'No',
@@ -329,10 +333,7 @@ export default {
             this.$router.go(0)
           },
           err => {
-            this.$notifier.showMessage({
-              content: err,
-              color: 'error'
-            })
+            this.$errorHandler.showMessage(err)
             this.createLoading = false;
             this.isCreateDialogOpen = false;
           }
@@ -354,10 +355,7 @@ export default {
             this.$router.go(0)
           },
           err => {
-            this.$notifier.showMessage({
-              content: err,
-              color: 'error'
-            })
+            this.$errorHandler.showMessage(err)
             this.updateLoading = false;
             this.isUpdateDialogOpen = false;
           }
@@ -374,10 +372,7 @@ export default {
             this.$router.go(0)
           },
           err => {
-            this.$notifier.showMessage({
-              content: err,
-              color: 'error'
-            })
+            this.$errorHandler.showMessage(err)
             this.deleteLoading = false;
             this.isDeleteDialogOpen = false;
           }

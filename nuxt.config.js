@@ -31,6 +31,7 @@ export default {
     { src: '~/plugins/axios' },
     { src: '~/plugins/notifier' },
     { src: '~/plugins/utils.js' },
+    { src: '~/plugins/errorHandler' },
   ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components

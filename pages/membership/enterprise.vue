@@ -455,7 +455,7 @@
                   >
                     <span>
                       <v-icon>mdi-file-download</v-icon>
-                      양식 다운로드
+                      다운로드
                     </span>
                   </button>
                 </div>
@@ -510,10 +510,7 @@ export default {
   created() {
     this.$store.commit('setSheetTitle', '기업회원정보')
     if (!!this.fetchError) {
-      this.$notifier.showMessage({
-        content: this.fetchError,
-        color: 'error'
-      })
+      this.$errorHandler.showMessage(this.fetchError)
     }
   },
   data: () => ({
@@ -698,10 +695,7 @@ export default {
           this.$vuetify.goTo("#scrollTarget", this.scrollOptions)
         },
         err => {
-          this.$notifier.showMessage({
-            content: err,
-            color: 'error'
-          })
+          this.$errorHandler.showMessage(err)
           this.activeUser = null;
         }
       )
@@ -714,10 +708,7 @@ export default {
           this.$router.go(0)
         },
         err => {
-          this.$notifier.showMessage({
-            content: err,
-            color: 'error'
-          })
+          this.$errorHandler.showMessage(err)
         }
       )
     },
@@ -733,10 +724,7 @@ export default {
           this.$router.go(0)
         },
         err => {
-          this.$notifier.showMessage({
-            content: err,
-            color: 'error'
-          })
+          this.$errorHandler.showMessage(err)
         }
       )
     },
@@ -765,10 +753,7 @@ export default {
           this.$router.go(0);
         },
         err => {
-          this.$notifier.showMessage({
-            content: err,
-            color: 'error'
-          })
+          this.$errorHandler.showMessage(err)
           this.updatePointLoading = false;
         }
       )
@@ -788,10 +773,7 @@ export default {
           this.$router.go(0);
         },
         err => {
-          this.$notifier.showMessage({
-            content: err,
-            color: 'error'
-          })
+          this.$errorHandler.showMessage(err)
           this.updateYearPassLoading = false;
         }
       )
@@ -813,10 +795,7 @@ export default {
           this.$router.go(0);
         },
         err => {
-          this.$notifier.showMessage({
-            content: err,
-            color: 'error'
-          })
+          this.$errorHandler.showMessage(err)
           this.addIpAddressLoading = false;
         }
       )
@@ -835,10 +814,7 @@ export default {
           this.$router.go(0);
         },
         err => {
-          this.$notifier.showMessage({
-            content: err,
-            color: 'error'
-          })
+          this.$errorHandler.showMessage(err)
           item.isLoading = false;
         }
       )
@@ -861,10 +837,7 @@ export default {
           this.$router.go(0);
         },
         err => {
-          this.$notifier.showMessage({
-            content: err,
-            color: 'error'
-          })
+          this.$errorHandler.showMessage(err)
           this.approveSignUpLoading = false;
         }
       )
@@ -893,10 +866,7 @@ export default {
           link.click();
         },
         err => {
-          this.$notifier.showMessage({
-            content: err,
-            color: 'error'
-          })
+          this.$errorHandler.showMessage(err)
         }
       )
     },

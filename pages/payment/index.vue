@@ -229,7 +229,7 @@ export default {
     return store.dispatch('fee/readAllPlan').then(
       res => {
         return {
-          planItems: res,
+          planItems: res.sort((a,b) => a.price - b.price),
           fetchError: null
         }
       },
@@ -240,6 +240,11 @@ export default {
         }
       }
     )
+  },
+  created() {
+    if (!!this.fetchError) {
+      this.$errorHandler.showMessage(this.fetchError)
+    }
   },
   data: () => ({
     planDashboardHeader: '요금제 관리',
@@ -356,10 +361,7 @@ export default {
           this.createLoading = false
         },
         err => {
-          this.$notifier.showMessage({
-            content: err,
-            color: 'error'
-          })
+          this.$errorHandler.showMessage(err)
           this.createLoading = false
         }
       )
@@ -413,10 +415,7 @@ export default {
           this.updateLoading = false
         },
         err => {
-          this.$notifier.showMessage({
-            content: err,
-            color: 'error'
-          })
+          this.$errorHandler.showMessage(err)
           this.updateLoading = false
         }
       )
@@ -430,10 +429,7 @@ export default {
           this.$router.go(0)
         },
         err => {
-          this.$notifier.showMessage({
-            content: err,
-            color: 'error'
-          })
+          this.$errorHandler.showMessage(err)
           this.deleteLoading = false
         }
       )
@@ -459,10 +455,7 @@ export default {
         let price = isCreate ? this.tempPlanPriceForCreate : this.tempPlanPriceForUpdate;
 
         if (name === temp['name']) {
-          this.$notifier.showMessage({
-            content: '요금제명이 중복됩니다.',
-            color: 'error'
-          })
+          this.$errorHandler.showMessage(err)
           return false;
         }
 

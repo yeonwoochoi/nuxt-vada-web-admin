@@ -13,7 +13,7 @@ export const actions = {
           resolve(res)
         })
         .catch(err => {
-          reject(err.response.data.message)
+          reject(err.response.data)
         })
     }))
   },
@@ -24,7 +24,7 @@ export const actions = {
           resolve(res)
         })
         .catch(err => {
-          reject(err.response.data.message)
+          reject(err.response.data)
         })
     }))
   },
@@ -35,7 +35,7 @@ export const actions = {
           resolve(res)
         })
         .catch(err => {
-          reject(err.response.data.message)
+          reject(err.response.data)
         })
     }))
   },
@@ -50,7 +50,7 @@ export const actions = {
       this.$axios.$post('/file/download/license', payload, config).then(res => {
         resolve(res)
       }).catch(err => {
-        reject(err.response.data.message)
+        reject(err.response.data)
       })
     }))
   },

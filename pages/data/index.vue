@@ -178,10 +178,7 @@ export default {
   },
   created() {
     if (!!this.fetchError) {
-      this.$notifier.showMessage({
-        content: this.fetchError,
-        color: 'error'
-      })
+      this.$errorHandler.showMessage(this.fetchError)
     }
   },
   data: () => ({
@@ -243,10 +240,7 @@ export default {
 
         },
         err => {
-          this.$notifier.showMessage({
-            content: err,
-            color: 'error'
-          })
+          this.$errorHandler.showMessage(err)
           this.dataTypes[index].progress = 0;
           callback()
         }
@@ -293,10 +287,7 @@ export default {
           }, this.resetTime)
         },
         err => {
-          this.$notifier.showMessage({
-            content: err,
-            color: 'error'
-          })
+          this.$errorHandler.showMessage(err)
           callback()
           this.dataTypes[index].progress = 0
         }
@@ -348,10 +339,7 @@ export default {
           this.$refs.apiKeyRef.reset()
         },
         err => {
-          this.$notifier.showMessage({
-            content: err,
-            color: 'error'
-          })
+          this.$errorHandler.showMessage(err)
         }
       )
     }

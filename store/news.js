@@ -10,7 +10,7 @@ export const actions = {
           resolve(res)
         })
         .catch(err => {
-          reject(err.response.data.message)
+          reject(err.response.data)
         })
     }))
   },
@@ -21,7 +21,7 @@ export const actions = {
           resolve(res.notices)
         })
         .catch(err => {
-          reject(err.response.data.message)
+          reject(err.response.data)
         })
     }))
   },
@@ -30,7 +30,7 @@ export const actions = {
       this.$axios.$get('/notice/' + params).then(res=> {
         resolve(res.notice)
       }).catch(err => {
-        reject(err.response.data.message)
+        reject(err.response.data)
       })
     })
   },
@@ -45,7 +45,7 @@ export const actions = {
           resolve(res)
         })
         .catch(err => {
-          reject(err.response.data.message)
+          reject(err.response.data)
         })
     })
   },
@@ -56,7 +56,7 @@ export const actions = {
           resolve(res)
         })
         .catch(err => {
-          reject(err.response.data.message)
+          reject(err.response.data)
         })
     })
   }

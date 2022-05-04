@@ -203,6 +203,11 @@ export default {
       }
     )
   },
+  created() {
+    if (!!this.fetchError) {
+      this.$errorHandler.showMessage(this.fetchError)
+    }
+  },
   data: () => ({
     inquiryTitle: '고객문의목록',
     inquiryHeader: [
@@ -294,10 +299,7 @@ export default {
           this.$vuetify.goTo("#scrollInquiryTarget", this.scrollOptions)
         },
         err => {
-          this.$notifier.showMessage({
-            content: err,
-            color: 'error'
-          })
+          this.$errorHandler.showMessage(err)
           this.showDetailLoading = false
         }
       )
@@ -324,10 +326,7 @@ export default {
             this.$router.go(0)
           },
           err => {
-            this.$notifier.showMessage({
-              content: err,
-              color: 'error'
-            })
+            this.$errorHandler.showMessage(err)
             this.submitLoading = false;
           }
         )
@@ -342,10 +341,7 @@ export default {
             this.$router.go(0)
           },
           err => {
-            this.$notifier.showMessage({
-              content: err,
-              color: 'error'
-            })
+            this.$errorHandler.showMessage(err)
             this.deleteLoading = false;
             this.isDeleteDialogOpen = false;
           }

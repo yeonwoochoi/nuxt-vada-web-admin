@@ -10,7 +10,7 @@ export const actions = {
           resolve(res['enquires'])
         })
         .catch(err => {
-          reject(err.response.data.message)
+          reject(err.response.data)
         })
     }))
   },
@@ -21,7 +21,7 @@ export const actions = {
           resolve(res['enquires'])
         })
         .catch(err => {
-          reject(err.response.data.message)
+          reject(err.response.data)
         })
     }))
   },
@@ -30,7 +30,7 @@ export const actions = {
       this.$axios.$get('/enquire/' + params).then(res=> {
         resolve(res['enquire'])
       }).catch(err => {
-        reject(err.response.data.message)
+        reject(err.response.data)
       })
     })
   },
@@ -44,7 +44,7 @@ export const actions = {
           resolve(res)
         })
         .catch(err => {
-          reject(err.response.data.message)
+          reject(err.response.data)
         })
     })
   },
@@ -55,7 +55,7 @@ export const actions = {
           resolve(res)
         })
         .catch(err => {
-          reject(err.response.data.message)
+          reject(err.response.data)
         })
     })
   }

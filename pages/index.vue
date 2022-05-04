@@ -144,8 +144,6 @@ export default {
   name: "index",
   components: {LineChart, DashboardCard},
   async asyncData({$axios}) {
-    //let getNewsItems = store.dispatch('news/readAll')
-    //let getEnquireItems = store.dispatch('enquire/readAll')
     let getNewsItems = $axios.$get('/notice')
     let getEnquireItems = $axios.$get('/enquire')
     try {
@@ -192,6 +190,11 @@ export default {
         newsItems: [],
         fetchError: e
       }
+    }
+  },
+  created() {
+    if (!!this.fetchError) {
+      this.$errorHandler.showMessage(this.fetchError)
     }
   },
   data: () => ({

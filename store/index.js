@@ -14,7 +14,11 @@ export const state = () => ({
         { title: '기업회원관리', icon: 'mdi-office-building', link: '/membership/enterprise' },
       ]
     },
-    { title: '결제서비스', icon: 'mdi-currency-usd', link: '/payment', items: []},
+    { title: '결제서비스', icon: 'mdi-currency-usd', link: '/payment/plan', items: [
+        { title: '플랜관리', icon: 'mdi-newspaper-variant-multiple', link: '/payment/plan' },
+        { title: '결제내역', icon: 'mdi-clipboard-text-outline', link: '/payment/log' },
+      ]
+    },
     { title: '고객서비스', icon: 'mdi-account-tie-voice', link: '/support/news', items: [
         { title: '공지사항', icon: 'mdi-newspaper-variant-multiple', link: '/support/news' },
         { title: 'FAQ', icon: 'mdi-frequently-asked-questions', link: '/support/faq' },

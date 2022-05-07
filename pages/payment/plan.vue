@@ -80,6 +80,9 @@
                   </v-col>
                 </v-row>
               </template>
+              <template v-slot:item.price="{item}">
+                <p class="mb-0">{{item.price.toLocaleString()}}</p>
+              </template>
               <template v-slot:item.detail="{item}">
                 <v-btn
                   class="font-weight-bold elevation-0 pa-0 no-background-hover"
@@ -138,7 +141,7 @@
                 <p class="user-detail-header-font">가격</p>
               </v-col>
               <v-col cols="12" sm="8">
-                <p class="user-detail-content-font">{{ activeItem['price'] }}</p>
+                <p class="user-detail-content-font">{{ activeItem['price'].toLocaleString() }}</p>
               </v-col>
               <v-col cols="11">
                 <v-divider/>

@@ -88,13 +88,16 @@ export default {
         link += `/${result[i]}`
         breadcrumbs.push({
           text: result[i],
-          disabled: link === '/support' || link === '/membership',
+          disabled: link === '/support' || link === '/membership' || link === '/payment',
           href: link,
           color: 'black'
         })
       }
       this.currentPath = breadcrumbs
     }
+  },
+  created() {
+    this.setCurrentPath(this.$router.currentRoute.path)
   }
 }
 </script>

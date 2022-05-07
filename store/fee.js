@@ -43,4 +43,26 @@ export const actions = {
         })
     }))
   },
+  async readAllPayment({commit}, params) {
+    return new Promise(((resolve, reject) => {
+      this.$axios.$get('/user/report/purchases')
+        .then(res => {
+          resolve(res['paymentLogs'])
+        })
+        .catch(err => {
+          reject(err.response.data)
+        })
+    }))
+  },
+  async readPlanByIdx({commit}, param) {
+    return new Promise(((resolve, reject) => {
+      this.$axios.$get('/service/' + param)
+        .then(res => {
+          resolve(res['vadaService'])
+        })
+        .catch(err => {
+          reject(err.response.data)
+        })
+    }))
+  }
 }

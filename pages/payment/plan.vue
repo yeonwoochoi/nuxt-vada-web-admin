@@ -135,7 +135,7 @@
                 <p class="user-detail-header-font">보고서 수</p>
               </v-col>
               <v-col cols="12" sm="8">
-                <p class="user-detail-content-font">{{ activeItem['numReports'] }}</p>
+                <p class="user-detail-content-font">{{ activeItem['numReports'].toLocaleString() }}</p>
               </v-col>
               <v-col cols="12" sm="4" class="text-sm-center">
                 <p class="user-detail-header-font">가격</p>

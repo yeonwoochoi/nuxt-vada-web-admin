@@ -185,7 +185,7 @@
                 <p class="user-detail-header-font">포인트</p>
               </v-col>
               <v-col cols="12" sm="9">
-                <p class="user-detail-content-font">{{ activeUser.point }}</p>
+                <p class="user-detail-content-font">{{ activeUser.point.toLocaleString() }}</p>
               </v-col>
 
               <v-col cols="12" class="py-2"><v-divider/></v-col>

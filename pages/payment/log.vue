@@ -16,14 +16,14 @@
                 <p v-else class="mb-0">{{item.serviceName}}</p>
               </template>
               <template v-slot:item.price="{item}">
-                <p v-if="item.isDeleted" class="mb-0 red--text">{{item.price}}</p>
-                <p v-else-if="item.isUpdated" class="mb-0 blue--text">{{item.price}}</p>
-                <p v-else class="mb-0">{{item.price}}</p>
+                <p v-if="item.isDeleted" class="mb-0 red--text">{{item.price.toLocaleString()}}</p>
+                <p v-else-if="item.isUpdated" class="mb-0 blue--text">{{item.price.toLocaleString()}}</p>
+                <p v-else class="mb-0">{{item.price.toLocaleString()}}</p>
               </template>
               <template v-slot:item.numReports="{item}">
                 <p v-if="item.isDeleted" class="mb-0 red--text">{{item.numReports}}</p>
-                <p v-else-if="item.isUpdated" class="mb-0 blue--text">{{item.numReports}}</p>
-                <p v-else class="mb-0">{{item.numReports}}</p>
+                <p v-else-if="item.isUpdated" class="mb-0 blue--text">{{item.numReports.toLocaleString()}}</p>
+                <p v-else class="mb-0">{{item.numReports.toLocaleString()}}</p>
               </template>
             </v-data-table>
           </template>

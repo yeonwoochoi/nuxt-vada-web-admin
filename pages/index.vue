@@ -152,11 +152,11 @@ export default {
       let tempInquiryItems = results[1]['enquires']
 
       let newsItems = []
-      for (let i = 0; i < tempNewsItems.length; i++) {
+      for (let i = tempNewsItems.length-1; i >= 0; i--) {
         let item = tempNewsItems[i]
         let time = item.updatedAt.split('T')[0]
         newsItems.push({
-          no: i+1,
+          no: tempNewsItems.length - i,
           idx: item.id,
           title: item.title,
           content: item.content,
@@ -165,12 +165,12 @@ export default {
         })
       }
       let inquiryItems = [];
-      for (let i = 0; i < tempInquiryItems.length; i++) {
+      for (let i = tempInquiryItems.length-1; i >= 0; i--) {
         let item = tempInquiryItems[i]
         if (!!item['answered']) continue;
         let userInfo = await Promise.all([$axios.$get('/user/' + item['userId'])])
         inquiryItems.push({
-          no: i+1,
+          no: tempInquiryItems.length - i,
           title: item['title'],
           author: userInfo[0]['user']['email'],
           created_at: item.updatedAt.split('T')[0],

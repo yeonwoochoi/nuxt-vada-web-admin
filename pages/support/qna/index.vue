@@ -162,7 +162,7 @@ export default {
     return store.dispatch('enquire/readAll').then(
       res => {
         let result = []
-        for (let i = 0; i < res.length; i++) {
+        for (let i = res.length-1; i >= 0; i--) {
           let item = res[i]
 
           let created_at = item.updatedAt.split('T')[0]
@@ -179,7 +179,7 @@ export default {
           }
 
           result.push({
-            index: i+1,
+            no: res.length-i
             idx: item.id,
             userId: item.userId,
             title: item.title,
@@ -225,7 +225,6 @@ export default {
       },
       {
         text: '날짜',
-        sortable: false,
         align: 'center',
         width: '15%',
         value: 'created_at'

@@ -192,11 +192,11 @@ export default {
     return store.dispatch('faq/readAll').then(
       res => {
         let result = []
-        for (let i = 0; i < res.length; i++) {
+        for (let i = res.length-1; i >= 0; i--) {
           let item = res[i]
           let created_at = item.updatedAt.split('T')[0]
           result.push({
-            no: i+1,
+            no: res.length-i,
             idx: item.id,
             data: {
               title: item.title,

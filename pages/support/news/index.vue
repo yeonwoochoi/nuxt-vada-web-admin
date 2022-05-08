@@ -206,12 +206,12 @@ export default {
     return store.dispatch('news/readAll').then(
       res => {
         let result = []
-        for (let i = 0; i < res.length; i++) {
+        for (let i = res.length-1; i >= 0; i--) {
           let item = res[i]
           let time = item.updatedAt.split('T')[0]
           let created_at = time.split('T')[0]
           result.push({
-            no: i+1,
+            no: res.length-i,
             idx: item.id,
             title: item.title,
             content: item.content,
@@ -256,7 +256,6 @@ export default {
       },
       {
         text: '날짜',
-        sortable: false,
         align: 'center',
         width: '12%',
         value: 'created_at'

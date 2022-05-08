@@ -179,7 +179,7 @@ export default {
           }
 
           result.push({
-            no: res.length-i
+            no: res.length-i,
             idx: item.id,
             userId: item.userId,
             title: item.title,

@@ -5,19 +5,61 @@
         <dashboard-card :title="header">
           <template v-slot:default>
             <v-row align="center" justify="start" class="pa-12">
-              <v-col cols="12" md="6" xl="4" v-for="(data, index) in dataTypes" :key="`data-${index}`">
-                <horizontal-card
-                  :title="data.title"
-                  :updated-at="data.updated_at"
-                  :color="data.color"
-                  :count="data.count"
-                  :data-key="data.key"
-                  :upload-percentage="data.progress"
-                  @download="downloadFile"
-                  @upload="uploadFile"
-                  :width="'100%'"
-                />
-              </v-col>
+              <v-item-group multiple style="width: 100%; height: fit-content" v-model="selected">
+                <v-row>
+                  <v-col cols="12">
+                    <v-btn
+                      @click="updateData"
+                      class="mr-2 pa-1 font-weight-bold"
+                      x-large
+                      solo
+                      :color="baseColor"
+                      dark
+                    >
+                      업데이트
+                    </v-btn>
+                    <v-btn
+                      @click="selectedAll"
+                      class="mr-2 pa-1 font-weight-bold"
+                      x-large
+                      solo
+                      :color="baseColor"
+                      dark
+                    >
+                      모두선택
+                    </v-btn>
+                  </v-col>
+                  <v-col cols="12" sm="6" md="4" v-for="(data, index) in dataTypes" :key="`data-${index}`">
+                    <v-item v-slot="{ active, toggle }">
+                      <v-card
+                        :color="data.color"
+                        class="align-center px-6 pb-2 pt-3"
+                        @click="toggle"
+                        style="align-items: center; min-height: 230px"
+                        dark
+                      >
+                        <v-card-title
+                          class="text-h5 mb-2"
+                          v-text="data.title"
+                        />
+                        <v-divider/>
+                        <v-card-subtitle>
+                          <p >마지막 업데이트: <span class="font-weight-bold subtitle-1 pl-1">{{data.updated_at}}</span></p>
+                          <p class="mb-0">데이터 수: <span class="font-weight-bold subtitle-1 pl-1">{{data.count.toLocaleString()}}</span></p>
+                        </v-card-subtitle>
+                        <v-overlay :value="active" absolute>
+                          <div
+                            v-if="active"
+                            class="text-h2 flex-grow-1 text-center"
+                          >
+                            ✓
+                          </div>
+                        </v-overlay>
+                      </v-card>
+                    </v-item>
+                  </v-col>
+                </v-row>
+              </v-item-group>
             </v-row>
           </template>
         </dashboard-card>
@@ -67,8 +109,8 @@
 </template>
 
 <script>
-import DashboardCard from "@/components/Cards/DashboardCard";
-import HorizontalCard from "@/components/Cards/HorizontalCard";
+import DashboardCard from "../../components/Cards/DashboardCard";
+import HorizontalCard from "../../components/Cards/HorizontalCard";
 import {mapState} from "vuex";
 
 export default {
@@ -186,7 +228,8 @@ export default {
     apiHeader: 'API KEY 관리',
     newDataFile: null,
     resetTime: 1000,
-    newKiprisApiKey: ''
+    newKiprisApiKey: '',
+    selected: []
   }),
   computed: {
     ...mapState({
@@ -194,6 +237,39 @@ export default {
     })
   },
   methods: {
+    updateData() {
+      if (this.selected.length <= 0) {
+        this.$notifier.showMessage({
+          content: '선택된 데이터 항목이 없습니다.',
+          color: 'error'
+        })
+        return;
+      }
+      let result = []
+      for (let i = 0; i < this.selected.length; i++) {
+        result.push(this.dataTypes[parseInt(this.selected[i])]['key'])
+      }
+      this.$store.dispatch('data/uploadFile', {types: result}).then(
+        res => {
+          this.$notifier.showMessage({
+            content: '데이터 업데이트 완료',
+            color: 'success'
+          })
+          this.selected = []
+        },
+        err => {
+          this.$errorHandler.showMessage(err)
+        }
+      )
+    },
+    selectedAll() {
+      let result = []
+      for (let i = 0; i < this.dataTypes.length; i++) {
+        result.push(this.dataTypes[i]['key'])
+      }
+      this.selected = result
+    },
+    /*
     async uploadFile({key, file}, callback) {
       if (!file) {
         this.$notifier.showMessage({
@@ -319,6 +395,8 @@ export default {
           return 'allIndustrySales'
       }
     },
+
+    */
     async updateApiKey() {
       if (!this.newKiprisApiKey) {
         this.$notifier.showMessage({

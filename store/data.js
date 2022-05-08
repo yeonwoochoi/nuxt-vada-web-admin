@@ -10,9 +10,10 @@ export const actions = {
         })
     }))
   },
+  // {types: []}
   async uploadFile({commit}, payload) {
     return new Promise((resolve, reject) => {
-      this.$axios.$put('/patent/file?type=' + payload.key, payload.data, payload.config).then(
+      this.$axios.$put('/patent/file', payload).then(
         res => {
           resolve(res['patentFileLog'])
         })

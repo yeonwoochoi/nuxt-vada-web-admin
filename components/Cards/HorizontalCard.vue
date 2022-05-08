@@ -20,6 +20,7 @@
             <p class="mb-0">데이터 수: <span class="font-weight-bold subtitle-1 pl-1">{{count.toLocaleString()}}</span></p>
           </v-card-subtitle>
         </v-col>
+        <!--
         <v-col cols="12" sm="4" align="center">
           <v-progress-circular
             :rotate="-90"
@@ -89,6 +90,7 @@
             </v-btn>
           </v-card-actions>
         </v-col>
+        -->
       </v-row>
     </div>
   </v-card>

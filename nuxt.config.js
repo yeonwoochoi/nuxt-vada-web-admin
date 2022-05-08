@@ -119,7 +119,8 @@ export default {
 
   axios: {
     prefix: '/api',
-    proxy: true
+    proxy: true,
+    retry: { retries: 3 }
   },
 
   env: {

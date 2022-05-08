@@ -102,13 +102,26 @@ export default {
   build: {
     transpile: ['vee-validate/dist/rules'],
   },
+
   server: {
     port: 8766,
     host: '0.0.0.0'
   },
-  axios: {
-    baseURL: process.env.API_URL
+
+  proxy: {
+    '/api/': {
+      target: process.env.API_URL,
+      pathRewrite: {
+        '^/api/': ''
+      }
+    },
   },
+
+  axios: {
+    prefix: '/api',
+    proxy: true
+  },
+
   env: {
     NODE_ENV: process.env.NODE_ENV
   }

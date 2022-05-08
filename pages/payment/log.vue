@@ -46,19 +46,29 @@ export default {
   async asyncData ({$axios, store}) {
     try {
       let paymentLog = await store.dispatch('fee/readAllPayment')
+      let plans = await store.dispatch('fee/readAllPlan')
       let result = []
       for (let i = paymentLog.length-1; i >= 0; i--) {
-        let userInfo = await store.dispatch('user/getUserByIdx', paymentLog[i]['userId'])
         let serviceInfo = null
-        let isError = false
+        let hasValue = false
         try {
-          serviceInfo = await store.dispatch('fee/readPlanByIdx', paymentLog[i]['serviceId'])
+          serviceInfo = {
+            name: '-',
+            price: '-',
+            numReports: '-',
+          }
+          for (let j = 0; j < plans.length; j++ ) {
+            if (plans[j]['id'] === paymentLog[i]['serviceId']) {
+              serviceInfo = plans[j]
+              hasValue = true
+            }
+          }
         }
         catch (e) {
-          isError = true
+          hasValue = false
         }
         finally {
-          if (isError) {
+          if (!hasValue) {
             serviceInfo = {
               name: '-',
               price: '-',
@@ -72,13 +82,13 @@ export default {
         result.push({
           ...paymentLog[i],
           created_at: `${time[0]} ${time[1].split('.')[0]}`,
-          email: userInfo['email'],
+          email: paymentLog[i]['email'],
           serviceName: serviceInfo['name'],
           servicePrice: serviceInfo['price'],
           numReports: serviceInfo['numReports'],
           price: paymentLog[i]['price'],
           isUpdated: paymentLog[i]['price'] !== serviceInfo['price'],
-          isDeleted: isError
+          isDeleted: !hasValue
         })
 
       }
@@ -98,7 +108,6 @@ export default {
     if (!!this.fetchError) {
       this.$errorHandler.showMessage(this.fetchError)
     }
-    console.log(this.paymentLog)
   },
   data: () => ({
     header: '결제내역',

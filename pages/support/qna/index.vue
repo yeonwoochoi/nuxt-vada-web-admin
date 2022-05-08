@@ -216,7 +216,7 @@ export default {
         sortable: false,
         width: '8%',
         align: 'center',
-        value: 'index'
+        value: 'no'
       },
       {
         text: '제목',

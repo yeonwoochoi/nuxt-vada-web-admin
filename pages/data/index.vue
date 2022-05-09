@@ -271,6 +271,7 @@ export default {
             content: '데이터 업데이트 완료',
             color: 'success'
           })
+          this.fetchData(res)
           this.selected = []
           this.isUpdating = false
         },
@@ -391,6 +392,7 @@ export default {
         }
       )
     },
+    */
     getPatentFileLog(key) {
       switch (key) {
         case 'CASH_FLOW':
@@ -417,8 +419,6 @@ export default {
           return 'allIndustrySales'
       }
     },
-
-    */
     async updateApiKey() {
       if (!this.newKiprisApiKey) {
         this.$notifier.showMessage({
@@ -442,6 +442,13 @@ export default {
           this.$errorHandler.showMessage(err)
         }
       )
+    },
+    fetchData(newData) {
+      for (let i = 0; i < this.dataTypes.length; i++) {
+        let key = this.getPatentFileLog(this.dataTypes[i]['key'])
+        this.dataTypes[i]['count'] = newData[key]['count']
+        this.dataTypes[i]['updated_at'] = newData[key]['updatedAt'].replace('T', ' ').split('.')[0]
+      }
     }
   },
 }

@@ -14,7 +14,8 @@
                       x-large
                       solo
                       :color="baseColor"
-                      dark
+                      :disabled="selected.length <=0"
+                      :class="`${selected.length > 0 ? 'white--text': ''}`"
                     >
                       업데이트
                     </v-btn>
@@ -73,7 +74,7 @@
                 <v-subheader>KEY</v-subheader>
               </v-col>
               <v-col cols="12" sm="10">
-                <p class="mb-0">{{apiKey.kipris}}</p>
+                <p class="mb-0">{{apiKey['kipris']}}</p>
               </v-col>
               <v-col cols="2" v-if="$vuetify.breakpoint.smAndUp">
                 <v-subheader>업데이트</v-subheader>
@@ -105,6 +106,16 @@
         </dashboard-card>
       </v-col>
     </v-row>
+    <v-overlay :value="isUpdating">
+      <p class="white--text font-weight-black headline text-center">업데이트 중입니다</p>
+      <p class="white--text font-weight-black headline text-center pl-1">잠시만 기다려주세요</p>
+      <div class="mt-6" style="display: flex; justify-content: center;">
+        <v-progress-circular
+          indeterminate
+          color="white"
+        />
+      </div>
+    </v-overlay>
   </v-container>
 </template>
 
@@ -223,13 +234,17 @@ export default {
       this.$errorHandler.showMessage(this.fetchError)
     }
   },
+  beforeRouteLeave(to, from, next) {
+    if (!this.isUpdating) next()
+  },
   data: () => ({
     header: '데이터 관리',
     apiHeader: 'API KEY 관리',
     newDataFile: null,
     resetTime: 1000,
     newKiprisApiKey: '',
-    selected: []
+    selected: [],
+    isUpdating: false
   }),
   computed: {
     ...mapState({
@@ -245,6 +260,7 @@ export default {
         })
         return;
       }
+      this.isUpdating = true;
       let result = []
       for (let i = 0; i < this.selected.length; i++) {
         result.push(this.dataTypes[parseInt(this.selected[i])]['key'])
@@ -256,16 +272,22 @@ export default {
             color: 'success'
           })
           this.selected = []
+          this.isUpdating = false
         },
         err => {
           this.$errorHandler.showMessage(err)
+          this.isUpdating = false
         }
       )
     },
     selectedAll() {
       let result = []
+      if (this.selected.length > 0) {
+        this.selected = []
+        return
+      }
       for (let i = 0; i < this.dataTypes.length; i++) {
-        result.push(this.dataTypes[i]['key'])
+        result.push(i)
       }
       this.selected = result
     },

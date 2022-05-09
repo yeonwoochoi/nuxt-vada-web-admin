@@ -2,7 +2,7 @@ export const state = () => ({
   backgroundColor: 'rgb(248, 248, 250)',
   baseColor: '#40A677',
   company: 'VADA PARTNERS',
-  madeBy: 'Run-i Studio',
+  madeBy: 'vadapartners.inc',
   siteOrigin: 'http://localhost:8765', // TODO: 나중에 url fetching 하면 바꿔야함
   companyDefaultLogo: require('assets/logo/logo_vada_black.png'),
   companyWhiteLogo: require('assets/logo/logo_vada_white.png'),

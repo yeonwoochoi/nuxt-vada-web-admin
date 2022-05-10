@@ -19,7 +19,7 @@
       </div>
       <div>
         <p class="mb-0">
-          {{ `©${getYear}, made with by ${madeBy}` }}
+          {{ `©${getYear}, ${madeBy}` }}
         </p>
       </div>
     </div>

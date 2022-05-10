@@ -210,7 +210,7 @@
                       dark
                       class="font-weight-bold ma-1"
                       :color="baseColor"
-                      width="200px"
+                      :width="$vuetify.breakpoint.smAndDown ? '150px' : '200px'"
                       height="52px"
                       v-bind="attrs"
                       v-on="on"
@@ -267,7 +267,7 @@
                       dark
                       class="font-weight-bold ma-1"
                       :color="baseColor"
-                      width="200px"
+                      :width="$vuetify.breakpoint.smAndDown ? '150px' : '200px'"
                       height="52px"
                       v-bind="attrs"
                       v-on="on"

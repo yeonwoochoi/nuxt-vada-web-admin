@@ -15,10 +15,14 @@
 <script>
 export default {
   name: "auth",
-  data: () => ({
-    cardWidth: '70%',
-    cardHeight: '600px',
-  }),
+  computed: {
+    cardWidth() {
+      return `${this.$vuetify.breakpoint.xsOnly ? '100%' : '70%'}`
+    },
+    cardHeight() {
+      return `${this.$vuetify.breakpoint.xsOnly ? '100%' : '600px'}`
+    }
+  }
 }
 </script>
 

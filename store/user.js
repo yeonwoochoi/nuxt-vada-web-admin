@@ -1,5 +1,3 @@
-import enterprise from "@/pages/membership/enterprise";
-
 export const state = () => ({
   emailForPwdReset: '',
 })

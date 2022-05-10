@@ -46,39 +46,6 @@
           </template>
         </dashboard-card>
       </v-col>
-      <!--
-      <v-col cols="12" md="5" class="my-2 pr-md-5">
-        <dashboard-card :title="dataTitle" :link="dataLink">
-          <template v-slot:default>
-            <v-timeline
-              dense
-              align-top
-              class="full-size"
-            >
-              <v-timeline-item
-                v-for="(n, i) in dataUpdateItems"
-                :key="i"
-                class="mb-4"
-                :color="baseColor"
-                icon-color="grey lighten-2"
-                small
-              >
-                <v-row align="center" justify="start">
-                  <v-col cols="7">
-                    <p class="subtitle-2 mb-0">{{n.updated_at}}</p>
-                  </v-col>
-                  <v-col
-                    cols="5"
-                  >
-                    <p class="caption mb-0">{{n.data}}</p>
-                  </v-col>
-                </v-row>
-              </v-timeline-item>
-            </v-timeline>
-          </template>
-        </dashboard-card>
-      </v-col>
-      -->
       <v-col cols="12" class="my-2 pl-md-5">
         <dashboard-card :title="newsTitle" :link="newsLink">
           <template v-slot:default>

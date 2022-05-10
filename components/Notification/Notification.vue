@@ -1,18 +1,4 @@
 <template>
-  <!--
-  <v-alert
-    prominent
-    tile
-    v-model="show"
-    :type="color"
-    transition="slide-y-transition"
-    class="mb-0"
-    dismissible
-    dense
-  >
-    {{ message }}
-  </v-alert>
-  -->
   <v-snackbar v-model="show" :color="color" top style="padding-top: 80px;">
     <div style="display: flex; align-items: center; justify-content: space-between">
       <p class="white--text mb-0 pl-6" style="font-size: 1rem;">{{ message }}</p>
